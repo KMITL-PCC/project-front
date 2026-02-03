@@ -9,7 +9,7 @@ type StatusBadgeProps = {
 
 
 const statusColorMap: Record<Status, string> = {
-    pending: "text-orange-500",
+    pending: "text-kmitl",
     checked_in: "text-green-600",
     checked_out: "text-gray-500",
     error: "text-red-500",

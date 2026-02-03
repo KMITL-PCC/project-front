@@ -85,7 +85,7 @@ export function CheckInClient({ room }: Props) {
         />
         <p>
           Please read and accept the{" "}
-          <span className="text-orange-500 underline cursor-pointer">
+          <span className="text-kmitl underline cursor-pointer">
             Privacy Policy
           </span>{" "}
           to continue
@@ -97,7 +97,7 @@ export function CheckInClient({ room }: Props) {
         onClick={handleAction}
         className="
           w-full rounded-xl py-3 font-semibold text-white
-          bg-orange-500 hover:bg-orange-600
+          bg-kmitl hover:bg-orange-600
           disabled:bg-orange-300 disabled:cursor-not-allowed
           transition
         "
