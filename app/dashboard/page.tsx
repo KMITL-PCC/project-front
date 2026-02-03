@@ -11,21 +11,21 @@ import {
   isSameDay,
   addDays,
 } from 'date-fns';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 const datain = [
-  { name: 'Present', value: 60 },
-  { name: 'Late', value: 25 },
-  { name: 'Absent', value: 15 },
+  { name: '00:00 - 11:59', value: 7 },
+  { name: '12:00 - 16:00', value: 7 },
+  { name: '17:00 - 23:59', value: 10 },
 ];
 
 const dataout = [
-  { name: 'Present', value: 32 },
-  { name: 'Late', value: 17 },
-  { name: 'Absent', value: 11 },
+  { name: '00:00 - 11:59', value: 10 },
+  { name: '12:00 - 16:00', value: 12 },
+  { name: '17:00 - 23:59', value: 3 },
 ];
 
-const COLORS = ['#4ade80', '#facc15', '#f87171'];
+const COLORS = ['#66C975', '#FADB60', '#CE5353'];
 
 export default function HomePage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -51,8 +51,8 @@ export default function HomePage() {
           onClick={() => {
             if (isCurrentMonth) setSelectedDate(day);
           }}
-          className={`relative flex items-center justify-center h-10 text-sm
-    ${isCurrentMonth ? 'cursor-pointer' : 'cursor-default opacity-40'}
+          className={`relative flex items-center justify-center h-9.5 w-9.5 mx-auto text-sm transition-colors duration-200 mt-0.4
+    ${isCurrentMonth ? 'cursor-pointer w-8 h-8 hover:bg-gray-100 rounded-full' : 'cursor-default opacity-40'}
   `}
         >
 
@@ -91,7 +91,7 @@ export default function HomePage() {
         <div className="flex items-center">
           <div className="text-right mr-4">
             <div className="font-bold">Lord Gaydow</div>
-            <div className="text-sm">Admin</div>
+            <div className="text-sm">Professor</div>
           </div>
           <img
             src="user.jpg"
@@ -108,7 +108,7 @@ export default function HomePage() {
         <div className="grid grid-rows-7 h-full min-h-0 ">
           {/* CALENDAR */}
           <div className="row-span-3 p-3 pb-0.5 grid grid-rows-[auto_auto_1fr] min-h-0">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <h3 className="text-xl font-bold text-[#1e3a5f]">
                 {format(currentMonth, 'MMMM yyyy')}
               </h3>
@@ -140,55 +140,133 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="grid grid-cols-7">
+            <div className="grid grid-cols-7 flex-1 min-h-0 items-center">
               {renderCalendarCells()}
             </div>
           </div>
           {/* PIE CHART */}
           <div className="row-span-4 grid grid-rows-[auto_1fr] h-full ">
-            <div className="py-2 pl-4 pt-6 text-sm text-[#203864] text-start font-medium row-span-1 ">
+            <div className="py-0.5 pl-4 pt-7 text-sm text-[#203864] text-start row-span-1 font-bold">
               {format(selectedDate, 'dd MMMM')}
             </div>
             <div className="grid grid-rows-2 gap-1 h-full ml-2 mr-2">
-              <div className="rounded-3xl bg-[#E0E6F2] border border-[#D0D7E4] ">
-                <div className='h-40 w-full'>
-                  <ResponsiveContainer width="50%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={datain}
-                        dataKey="value"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={80}
-                        paddingAngle={0}
-                      >
-                        {datain.map((_, index) => (
-                          <Cell key={index} fill={COLORS[index]} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
+              <div className="rounded-3xl bg-[#E0E6F2] border border-[#D0D7E4] relative ">
+                <div className='h-40 w-full absolute '>
+                  <div className='absolute inset-0 flex justify-center pointer-events-none'>
+                    <h1 className='font-bold text-[#203864]'>Time in</h1>
+                  </div>
+                  <div>
+                    <ResponsiveContainer width="50%" height="100%" className="absolute">
+                      <PieChart>
+                        <Tooltip
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              return (
+                                <div className="bg-white px-3 py-2 border rounded-xl shadow-md">
+                                  <p className="text-xs font-bold text-[#203864]">
+                                    {payload[0].name}
+                                  </p>
+                                  <p className="text-sm font-extrabold" style={{ color: payload[0].payload.fill }}>
+                                    Total : {payload[0].value}
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Pie
+                          data={datain}
+                          dataKey="value"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={35}
+                          outerRadius={65}
+                          paddingAngle={0}
+                          stroke="none"
+                          strokeWidth={0}
+                          activeShape={{ stroke: '#fff', strokeWidth: 2 }}
+                        >
+                          {datain.map((_, index) => (
+                            <Cell key={index} fill={COLORS[index]} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="w-1/2 flex flex-col items-center gap-3 ml-40 mt-10">
+                    {dataout.map((entry, index) => (
+                      <div key={index} className="flex items-center gap-4">
+                        <div
+                          className="w-5 h-5 rounded-md"
+                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        />
+                        <span className="text-[12px] font-extrabold" style={{ color: COLORS[index % COLORS.length] }}>
+                          {entry.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="rounded-3xl bg-[#FFE2DB] border border-[#F5C2C7]">
-                <ResponsiveContainer width="50%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={dataout}
-                      dataKey="value"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
-                      paddingAngle={0}
-                    >
-                      {dataout.map((_, index) => (
-                        <Cell key={index} fill={COLORS[index]} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+              <div className="rounded-3xl bg-[#FFE2DB] border border-[#F5C2C7] relative ">
+                <div className='h-40 w-full absolute '>
+                  <div className='absolute inset-0 flex justify-center pointer-events-none'>
+                    <h1 className='font-bold text-[#203864]'>Time out</h1>
+                  </div>
+                  <div>
+                    <ResponsiveContainer width="50%" height="100%" className="absolute">
+                      <PieChart>
+                        <Tooltip
+                          content={({ active, payload }) => {
+                            if (active && payload && payload.length) {
+                              return (
+                                <div className="bg-white px-3 py-2 border rounded-xl shadow-md">
+                                  <p className="text-xs font-bold text-[#203864]">
+                                    {payload[0].name}
+                                  </p>
+                                  <p className="text-sm font-extrabold" style={{ color: payload[0].payload.fill }}>
+                                    Total : {payload[0].value}
+                                  </p>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Pie
+                          data={dataout}
+                          dataKey="value"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={35}
+                          outerRadius={65}
+                          paddingAngle={0}
+                          stroke="none"
+                          strokeWidth={0}
+                          activeShape={{ stroke: '#fff', strokeWidth: 2 }}
+                        >
+                          {datain.map((_, index) => (
+                            <Cell key={index} fill={COLORS[index]} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="w-1/2 flex flex-col items-center gap-3 ml-40 mt-10">
+                    {dataout.map((entry, index) => (
+                      <div key={index} className="flex items-center gap-4">
+                        <div
+                          className="w-5 h-5 rounded-md"
+                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                        />
+                        <span className="text-[12px] font-extrabold" style={{ color: COLORS[index % COLORS.length] }}>
+                          {entry.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
