@@ -5,6 +5,7 @@ import { Card, CardContent } from "../ui/card";
 import { StatusBadge } from "./StatusBadge";
 import { StudentProfile } from "./StudentProfile";
 import { RoomHeader } from "./RoomHeader";
+import CheckoutSuccess from "../../app/successpage/CheckoutSuccess";
 
 
 type Props = {
@@ -16,7 +17,9 @@ type Status = "pending" | "checked_in" | "checked_out" | "error";
 export function CheckInClient({ room }: Props) {
   const [status, setStatus] = useState<Status>("pending");
   const [time, setTime] = useState("");
+  const [checkInTime, setCheckInTime] = useState("");
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     const updateTime = () => {
@@ -34,9 +37,11 @@ export function CheckInClient({ room }: Props) {
 
   const handleAction = () => {
     if (status === "pending") {
+      setCheckInTime(time);
       setStatus("checked_in");
     } else if (status === "checked_in") {
       setStatus("checked_out");
+      setShowSuccess(true);
     }
   };
 
@@ -99,6 +104,14 @@ export function CheckInClient({ room }: Props) {
       >
         {buttonLabel}
       </button>
+
+      <CheckoutSuccess
+        isOpen={showSuccess}
+        onClose={() => setShowSuccess(false)}
+        room={room}
+        checkInTime={checkInTime}
+        checkOutTime={time}
+      />
     </section>
   );
 }
