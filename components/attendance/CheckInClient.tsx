@@ -8,6 +8,7 @@ import { RoomHeader } from "./RoomHeader";
 import CheckoutSuccess from "../../app/successpage/CheckoutSuccess";
 
 
+
 type Props = {
   room: string;
 };
@@ -88,6 +89,7 @@ export function CheckInClient({ room }: Props) {
           <span className="text-kmitl underline cursor-pointer">
             Privacy Policy
           </span>{" "}
+          
           to continue
         </p>
       </div>
