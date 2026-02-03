@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "../ui/card";
-import { RoomHeader } from "./RoomHeader";
-import { StudentProfile } from "./StudentProfile";
 import { StatusBadge } from "./StatusBadge";
+import { StudentProfile } from "./StudentProfile";
+import { RoomHeader } from "./RoomHeader";
+
 
 type Props = {
   room: string;
@@ -17,7 +18,6 @@ export function CheckInClient({ room }: Props) {
   const [time, setTime] = useState("");
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
 
-  /* ================= TIME ================= */
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
@@ -32,7 +32,6 @@ export function CheckInClient({ room }: Props) {
     updateTime();
   }, []);
 
-  /* ================= ACTION ================= */
   const handleAction = () => {
     if (status === "pending") {
       setStatus("checked_in");
@@ -48,13 +47,14 @@ export function CheckInClient({ room }: Props) {
       ? "CHECK-OUT →"
       : "DONE";
 
-  /* ================= UI ================= */
+  const title = status === "checked_in" ? "Check-out" : "Check-in";
+
   return (
     <section className="w-full max-w-sm space-y-4">
-      <h1 className="text-center text-lg font-semibold">Check-in</h1>
+      <h1 className="text-center text-lg font-semibold text-black">{title}</h1>
 
       <Card className="rounded-3xl shadow-xl">
-        <CardContent className="p-6 text-center space-y-4">
+        <CardContent className="p-6 text-center space-y-4 text-black">
           <RoomHeader room={room} />
 
           <StudentProfile
@@ -87,7 +87,6 @@ export function CheckInClient({ room }: Props) {
         </p>
       </div>
 
-      {/* Action Button */}
       <button
         disabled={!acceptedPolicy || status === "checked_out"}
         onClick={handleAction}

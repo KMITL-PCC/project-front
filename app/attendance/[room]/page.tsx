@@ -1,4 +1,5 @@
-import { CheckInClient } from "@/components/check-in/CheckInClient";
+import { CheckInClient } from "@/components/attendance/CheckInClient";
+
 
 type PageProps = {
   params: Promise<{
