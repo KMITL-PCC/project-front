@@ -47,7 +47,7 @@ export default function LoginPage() {
     }
   };
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center -mt-10 bg-gradient-to-t from-white from-67% to-orange-500 font-sans">
+    <div className="min-h-screen flex flex-col items-center justify-center -mt-10 bg-gradient-to-t from-white from-67% to-kmitl font-sans">
       <img
         src="KMITL.png"
         alt="logo"
@@ -117,7 +117,7 @@ export default function LoginPage() {
           <div className="mt-12">
             <button
               onClick={() => handleLogin()}
-              className="w-full flex justify-center items-center bg-orange-500 hover:opacity-80 text-white font-bold py-3 rounded-2xl shadow-lg transition-all transform hover:scale-105"
+              className="w-full flex justify-center items-center bg-kmitl hover:opacity-80 text-white font-bold py-3 rounded-2xl shadow-lg transition-all transform hover:scale-105"
             >
               SIGN IN
               <img src="move-right.png" alt="" className="ml-2" />
