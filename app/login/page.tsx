@@ -143,10 +143,10 @@ export default function LoginPage() {
             alertType === "success"
               ? "bg-green-600 border-l-4 border-green-700"
               : "bg-red-500 border-l-4 border-red-700"
-          } text-white px-6 py-4 rounded-lg shadow-xl max-w-md w-full mx-4`}
+          } text-white px-6 py-4 rounded-lg shadow-xl max-w-md w-70 mx-4`}
         >
           <div className="flex items-center justify-between">
-            <span className="font-semibold">{alertMessage}</span>
+            <span className="font-semibold text-xs">{alertMessage}</span>
             {alertType !== "success" && (
               <button
                 onClick={() => setShowAlert(false)}
