@@ -47,7 +47,7 @@ export default function LoginPage() {
     }
   };
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center -mt-10 bg-gradient-to-t from-white from-70% to-orange-800 font-sans">
+    <div className="min-h-screen flex flex-col items-center justify-center -mt-10 bg-gradient-to-t from-white from-67% to-orange-500 font-sans">
       <img
         src="KMITL.png"
         alt="logo"
