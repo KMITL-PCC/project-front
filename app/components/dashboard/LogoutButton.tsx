@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 export default function ProfileDropdown() {
   const [open, setOpen] = useState(false)
@@ -39,7 +40,9 @@ export default function ProfileDropdown() {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 focus:outline-none"
       >
-        <img
+        <Image
+          width='40'
+          height='40'
           src="/qinshi.png"
           alt="Profile"
           className="w-10 h-10 rounded-full border"

@@ -27,7 +27,7 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({
          - เอา p-8 ออก (ย้ายไปข้างใน)
          - เพิ่ม flex flex-col เพื่อจัดการ layoutsssssss
       */}
-      <div className="relative w-full max-w-[440px] max-h-[90vh] bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
+      <div className="relative w-full max-w-110 max-h-[90vh] bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
         
         {/* Close Button: ปล่อยไว้ที่เดิม (Absolute) แต่อยู่ในกรอบนอก มันจะไม่เลื่อนตามเนื้อหา (Fixed position) */}
         <button 
@@ -64,7 +64,7 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({
             <p className="text-gray-500 text-lg mb-8 text-center px-4">Your check-out is complete.</p>
 
             {/* QR Code Section */}
-            <div className="w-full bg-orange-50/80 rounded-[2rem] p-6 mb-6 flex flex-col items-center border border-orange-100">
+            <div className="w-full bg-orange-50/80 rounded-4xl p-6 mb-6 flex flex-col items-center border border-orange-100">
               <QrCode size={80} className="text-orange-900 mb-4 opacity-80" strokeWidth={1.5} />
               <p className="text-orange-900 text-center text-base font-medium leading-tight">
                 Please scan the QR code again to<br />start a new session.

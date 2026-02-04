@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 type Props = {
   open: boolean;
   onClose: () => void;
@@ -32,7 +34,9 @@ export default function CheckStatusModal({
           {/* Icon */}
           <div className="mx-auto mt-2 flex h-20 w-20 sm:h-24 sm:w-24 items-center justify-center rounded-full bg-[#DD8724]/25">
             <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-[#DD8724]">
-                <img
+                <Image
+                  width={36}
+                  height={36}
                     src="/check.svg" alt="check icon"
                 className="h-7 w-7 sm:h-9 sm:w-9"
                 />

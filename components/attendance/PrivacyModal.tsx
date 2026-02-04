@@ -5,7 +5,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { X } from "lucide-react";
 
 export function PrivacyModal() {
   return (
@@ -16,7 +15,7 @@ export function PrivacyModal() {
         </span>
       </DialogTrigger>
       
-      <DialogContent className="max-w-[350px] rounded-[2.5rem] bg-white p-0 border-none shadow-2xl overflow-hidden gap-0">
+      <DialogContent className="max-w-87.5 rounded-[2.5rem] bg-white p-0 border-none shadow-2xl overflow-hidden gap-0">
         
         <DialogHeader className="p-6 pb-4 border-b border-gray-100">
           <DialogTitle className="text-center text-xl font-bold text-orange-500 uppercase tracking-tight">

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -65,17 +66,19 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full grid">
-      <div className="min-h-screen flex flex-col items-center justify-center -mt-10 bg-gradient-to-t from-white from-67% to-kmitl font-sans">
-        <img
-          src="KMITL.png"
+      <div className="min-h-screen flex flex-col items-center justify-center -mt-10 bg-linear-to-t from-white from-67% to-kmitl font-sans">
+        <Image
+          width={320}
+          height={150}
+          src="/KMITL.png"
           alt="logo"
-          className="h-26 mb-4 drop-shadow-md lg:h-40 md:h-36"
+          className="h-26 mb-4 drop-shadow-md lg:h-40 md:h-36 w-auto"
         />
 
         <div className="max-w-sm w-2/3">
           <div className="flex justify-center items-center mb-4">
             <h1 className=" font-bold text-gray-700 text-sm">SIGN IN</h1>
-            <img src="ceolgo.png" alt="ce logo" className="h-5 ml-2" />
+            <Image width={20} height={20} src="/ceolgo.png" alt="ce logo" className="h-5 ml-2 w-auto" />
           </div>
 
           <div className="space-y-4">
@@ -85,8 +88,10 @@ export default function LoginPage() {
               </label>
 
               <div className="relative">
-                <img
-                  src="id.png"
+                <Image
+                  width={20}
+                  height={20}
+                  src="/id.png"
                   alt="id icon"
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 opacity-50"
                 />
@@ -106,8 +111,10 @@ export default function LoginPage() {
               </label>
 
               <div className="relative">
-                <img
-                  src="lock.png"
+                <Image
+                  width={20}
+                  height={20}
+                  src="/lock.png"
                   alt="lock icon"
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 opacity-50"
                 />
@@ -123,8 +130,10 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 focus:outline-none"
                 >
-                  <img
-                    src={showPassword ? "eye.png" : "eye.png"}
+                  <Image
+                    width={20}
+                    height={20}
+                    src={showPassword ? "/eye.png" : "/eye-closed (1).png"}
                     alt="toggle password"
                     className="h-5 w-5 opacity-50 hover:opacity-100 transition-opacity"
                   />
@@ -138,16 +147,10 @@ export default function LoginPage() {
                 className="w-full flex justify-center items-center bg-kmitl hover:opacity-80 text-white font-bold py-3 rounded-2xl shadow-lg transition-all transform hover:scale-105"
               >
                 SIGN IN
-                <img src="move-right.png" alt="" className="ml-2" />
+                <Image width={20} height={20} src="/move-right.png" alt="" className="ml-2" />
               </button>
             </div>
-            {/* <div className="flex items-center my-6">
-            <div className="flex-grow h-[1px] bg-gray-200"></div>
-              <span className="flex-shrink mx-4 text-[10px] font-medium text-gray-400 uppercase tracking-[0.2em]">
-                Authentication Room XXXX
-              </span>
-            <div className="flex-grow h-[1px] bg-gray-200"></div>
-          </div> */}
+            
             <a className="text-xs text-gray-500">
               © 2026 KMITL Room Check in System. Designed & developed by CE03.
             </a>

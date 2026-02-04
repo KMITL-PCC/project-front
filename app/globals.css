@@ -1,5 +1,14 @@
 @import "tailwindcss";
+@layer utilities {
+  @keyframes ldio-spinner {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
 
+  .animate-spinner {
+    animation: ldio-spinner linear 1s infinite;
+  }
+}
 
 :root {
   --background: #ffffff;
