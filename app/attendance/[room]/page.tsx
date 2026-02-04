@@ -1,4 +1,4 @@
-import { CheckInClient } from "@/components/attendance/CheckInClient";
+import { CheckInClient } from "@/components/attendance/AttenDanceClient";
 
 
 type PageProps = {
