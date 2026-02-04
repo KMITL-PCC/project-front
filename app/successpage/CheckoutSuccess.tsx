@@ -50,7 +50,7 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({
             <div className="relative mb-6 mt-2 shrink-0">
               <div className="w-36 h-36 bg-orange-50 rounded-full flex items-center justify-center relative">
                 <span className="text-7xl">🎉</span>
-                <div className="absolute top-0 right-0 text-orange-500 animate-pulse">
+                <div className="absolute top-0 right-0 text-kmitl animate-pulse">
                   <Sparkles size={28} fill="currentColor" />
                 </div>
                 <div className="absolute bottom-1 left-1 bg-orange-600 rounded-full p-1.5 border-[5px] border-white shadow-sm">

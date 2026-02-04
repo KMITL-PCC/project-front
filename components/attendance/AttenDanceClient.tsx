@@ -5,9 +5,6 @@ import { Card, CardContent } from "../ui/card";
 import { StatusBadge } from "./StatusBadge";
 import { StudentProfile } from "./StudentProfile";
 import { RoomHeader } from "./RoomHeader";
-import CheckoutSuccess from "../../app/successpage/CheckoutSuccess";
-
-
 
 type Props = {
   room: string;
@@ -15,45 +12,96 @@ type Props = {
 
 type Status = "pending" | "checked_in" | "checked_out" | "error";
 
-export function CheckInClient({ room }: Props) {
+export function AttenDance({ room }: Props) {
   const [status, setStatus] = useState<Status>("pending");
   const [time, setTime] = useState("");
-  const [checkInTime, setCheckInTime] = useState("");
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const checkIn = async () => {
+    const res = await fetch("/api/check-in", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ room }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Check-in failed");
+    }
+
+    return res.json();
+  };
+
+  const checkOut = async () => {
+    const res = await fetch("/api/check-out", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ room }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Check-out failed");
+    }
+
+    return res.json();
+  };
+
+  const buttonLabel =
+    // status === "error"
+    //   ? "RETRY"
+     status === "pending"
+      ? "CHECK-IN →"
+      : status === "checked_in"
+        ? "CHECK-OUT →"
+        : "DONE";
+        
+
+  const title =
+    status === "checked_in"
+      ? "Check-out"
+      : status === "checked_out"
+        ? "Completed"
+        : "Check-in";
 
   useEffect(() => {
-    const updateTime = () => {
+    const interval = setInterval(() => {
       const now = new Date();
       setTime(
         now.toLocaleTimeString("th-TH", {
           hour: "2-digit",
           minute: "2-digit",
-        })
+        }),
       );
-    };
+    }, 1000);
 
-    updateTime();
+    return () => clearInterval(interval);
   }, []);
 
-  const handleAction = () => {
-    if (status === "pending") {
-      setCheckInTime(time);
-      setStatus("checked_in");
-    } else if (status === "checked_in") {
-      setStatus("checked_out");
-      setShowSuccess(true);
+  const handleAction = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      if (status === "pending") {
+        await checkIn();
+        setStatus("checked_in");
+      } else if (status === "checked_in") {
+        await checkOut();
+        setStatus("checked_out");
+      }
+    } catch (err) {
+      setStatus("error");
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
-
-  const buttonLabel =
-    status === "pending"
-      ? "CHECK-IN →"
-      : status === "checked_in"
-      ? "CHECK-OUT →"
-      : "DONE";
-
-  const title = status === "checked_in" ? "Check-out" : "Check-in";
 
   return (
     <section className="w-full max-w-sm space-y-4">
@@ -76,7 +124,6 @@ export function CheckInClient({ room }: Props) {
         </CardContent>
       </Card>
 
-      {/* Privacy */}
       <div className="flex items-start gap-2 text-sm text-gray-500">
         <input
           type="checkbox"
@@ -86,10 +133,9 @@ export function CheckInClient({ room }: Props) {
         />
         <p>
           Please read and accept the{" "}
-          <span className="text-kmitl underline cursor-pointer">
+          <span className="text-orange-500 underline cursor-pointer">
             Privacy Policy
           </span>{" "}
-          
           to continue
         </p>
       </div>
@@ -99,21 +145,13 @@ export function CheckInClient({ room }: Props) {
         onClick={handleAction}
         className="
           w-full rounded-xl py-3 font-semibold text-white
-          bg-kmitl hover:bg-orange-600
+          bg-orange-500 hover:bg-orange-600
           disabled:bg-orange-300 disabled:cursor-not-allowed
           transition
         "
       >
         {buttonLabel}
       </button>
-
-      <CheckoutSuccess
-        isOpen={showSuccess}
-        onClose={() => setShowSuccess(false)}
-        room={room}
-        checkInTime={checkInTime}
-        checkOutTime={time}
-      />
     </section>
   );
 }
