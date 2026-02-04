@@ -56,7 +56,7 @@ export default function TeacherLoginPage() {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter username"
               className="w-full rounded-xl border border-gray-300 px-4 py-2
-                         focus:outline-none focus:ring-2 focus:ring-orange-400"
+                         focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-600"
               required
             />
           </div>
@@ -74,7 +74,7 @@ export default function TeacherLoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
                 className="w-full rounded-xl border border-gray-300 px-4 py-2 pr-12
-                           focus:outline-none focus:ring-2 focus:ring-orange-400"
+                           focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-600"
                 required
               />
 
