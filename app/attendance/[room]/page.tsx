@@ -1,9 +1,5 @@
 import { AttenDance } from "@/components/attendance/AttenDanceClient";
 
-
-
-
-
 type PageProps = {
   params: Promise<{
     room?: string;
