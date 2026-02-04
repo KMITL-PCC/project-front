@@ -1,30 +1,47 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import { Eye, EyeOff } from 'lucide-react'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function TeacherLoginPage() {
-  const router = useRouter()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const validate = () => {
+    if (!username) {
+      setError("Please enter your username");
+      return false;
+    }
+
+    if (!password) {
+      setError("Please enter your password");
+      return false;
+    }
+
+    setError("");
+    return true;
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // mock login (เอาไว้ทดสอบ flow เฉย ๆ)
     // ไว้เปลี่ยนเป็นเรียก API + auth จริงทีหลัง
-    if (username && password) {
-      router.push('/dashboard')
+    if (validate()) {
+      router.push("/dashboard");
     }
-  }
+  };
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center px-4 bg-gradient-to-br from-orange-400 via-orange-200 to-white md:from-orange-500 md:via-orange-300">
       <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8">
-
         {/*Logo+Title*/}
         <div className="flex flex-col items-center mb-6">
           <Image
@@ -38,9 +55,7 @@ export default function TeacherLoginPage() {
           <h1 className="text-xl font-semibold text-orange-600 text-center">
             KMITL Attendance System
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Professor Login
-          </p>
+          <p className="text-sm text-gray-500 mt-1">Professor Login</p>
         </div>
 
         {/* Login Form */}
@@ -69,7 +84,7 @@ export default function TeacherLoginPage() {
 
             <div className="relative">
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
@@ -94,7 +109,7 @@ export default function TeacherLoginPage() {
           {/*Login Button*/}
           <button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600
+            className="w-full bg-kmitl hover:bg-orange-600
                        text-white font-semibold py-3 rounded-xl transition"
           >
             LOGIN →
@@ -106,5 +121,5 @@ export default function TeacherLoginPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }
