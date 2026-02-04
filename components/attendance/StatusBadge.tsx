@@ -6,28 +6,29 @@ type StatusBadgeProps = {
   status?: Status;
 };
 
-
-
 const statusColorMap: Record<Status, string> = {
-    pending: "text-kmitl",
-    checked_in: "text-green-600",
-    checked_out: "text-gray-500",
-    error: "text-red-500",
-  };
-  
+  pending: "text-kmitl",
+  checked_in: "text-green-600",
+  checked_out: "text-gray-500",
+  error: "text-red-500",
+};
 
-  export function StatusBadge({ label, value, status }: StatusBadgeProps) {
-    const statusColor = status
-      ? statusColorMap[status]
-      : "text-gray-900";
-  
-    return (
-      <div className="rounded-xl bg-neutral-100 py-3 text-center">
-        <p className="text-xs text-neutral-500">{label}</p>
-        <p className={`font-semibold ${statusColor}`}>
-          {value}
-        </p>
-      </div>
-    );
-  }
-  
+export function StatusBadge({ label, value, status }: StatusBadgeProps) {
+  const statusColor = status ? statusColorMap[status] : "text-gray-900";
+
+  return (
+    <div
+      className="
+        rounded-xl 
+        bg-neutral-200 
+        py-3 
+        text-center
+        border 
+        border-neutral-100
+      "
+    >
+      <p className="text-xs text-neutral-500">{label}</p>
+      <p className={`font-semibold ${statusColor}`}>{value}</p>
+    </div>
+  );
+}

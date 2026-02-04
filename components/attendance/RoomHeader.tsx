@@ -5,10 +5,10 @@ type Props = {
 export function RoomHeader({ room }: Props) {
   return (
     <div>
-      <p className="text-sm font-semibold text-kmitl">
+      <p className="text-lg font-semibold text-kmitl">
         CURRENT ROOM
         </p>
-      <h2 className="text-5xl font-extrabold">
+      <h2 className="text-8xl font-extrabold">
         {room}
         </h2>
     </div>
