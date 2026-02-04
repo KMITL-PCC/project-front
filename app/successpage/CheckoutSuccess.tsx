@@ -25,7 +25,7 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({
          - เอา overflow-y-auto ออก
          - ใส่ overflow-hidden แทน (เพื่อให้ content ไม่ล้นมุมโค้ง)
          - เอา p-8 ออก (ย้ายไปข้างใน)
-         - เพิ่ม flex flex-col เพื่อจัดการ layout
+         - เพิ่ม flex flex-col เพื่อจัดการ layoutsssssss
       */}
       <div className="relative w-full max-w-[440px] max-h-[90vh] bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
         
