@@ -5,6 +5,7 @@ import { Card, CardContent } from "../ui/card";
 import { StatusBadge } from "./StatusBadge";
 import { StudentProfile } from "./StudentProfile";
 import { RoomHeader } from "./RoomHeader";
+import { PrivacyModal } from "./PrivacyModal";
 
 type Props = {
   room: string;
@@ -124,6 +125,7 @@ export function AttenDance({ room }: Props) {
         </CardContent>
       </Card>
 
+
       <div className="flex items-start gap-2 text-sm text-gray-500">
         <input
           type="checkbox"
@@ -132,11 +134,7 @@ export function AttenDance({ room }: Props) {
           className="mt-1"
         />
         <p>
-          Please read and accept the{" "}
-          <span className="text-orange-500 underline cursor-pointer">
-            Privacy Policy
-          </span>{" "}
-          to continue
+          Please read and accept the <PrivacyModal /> to continue
         </p>
       </div>
 
