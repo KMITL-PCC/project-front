@@ -1,4 +1,7 @@
-import { CheckInClient } from "@/components/attendance/CheckInClient";
+import { AttenDance } from "@/components/attendance/AttenDanceClient";
+
+
+
 
 
 type PageProps = {
@@ -7,14 +10,14 @@ type PageProps = {
   }>;
 };
 
-export default async function CheckInPage({ params }: PageProps) {
+export default async function AttenDancePage({ params }: PageProps) {
   const { room } = await params;
 
   const safeRoom = room?.toUpperCase() ?? "UNKNOWN";
 
   return (
     <main className="min-h-screen bg-neutral-100 flex items-center justify-center px-4">
-      <CheckInClient room={safeRoom} />
+      <AttenDance room={safeRoom} />
     </main>
   );
 }
