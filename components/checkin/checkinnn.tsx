@@ -30,9 +30,12 @@ export default function CheckStatusModal({
         <div className="flex-1">
 
           {/* Icon */}
-          <div className="mx-auto mt-2 flex h-20 w-20 items-center justify-center rounded-full bg-kmitl">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-kmu">
-              <span className="text-2xl text-white">✓</span>
+          <div className="mx-auto mt-2 flex h-25 w-25 items-center justify-center rounded-full bg-[#DD8724]/25">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#DD8724]">
+                <img
+                    src="/check.svg" alt="check icon"
+                    className="h-9 w-9"
+                />
             </div>
           </div>
 
@@ -79,7 +82,7 @@ export default function CheckStatusModal({
         {/* ===== Button ===== */}
         <button
           onClick={onClose}
-          className="mt-15 mx-auto flex w-60 items-center justify-center gap-3 rounded-full bg-kmitl py-3 text-white"
+          className="mt-15 mx-auto flex w-60 items-center justify-center gap-3 rounded-2xl bg-[#F16322] py-3 text-white"
         >
           Done
         </button>
