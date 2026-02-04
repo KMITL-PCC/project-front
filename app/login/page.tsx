@@ -10,42 +10,59 @@ export default function LoginPage() {
   const [alertMessage, setAlertMessage] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const [alertType, setAlertType] = useState("error");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const validate = () => {
+    if (!id) {
+      setError("Please enter your Student ID");
+      setAlertType("error");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 1800);
+      return false;
+    }
+
+    if (!/^\d+$/.test(id)) {
+      setError("Student ID must contain only numbers");
+      setAlertType("error");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 1800);
+      return false;
+    }
+
+    if (!password) {
+      setError("Please enter your password");
+      setAlertType("error");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 1800);
+      return false;
+    }
+
+    if (id.length !== 8) {
+      setError("Invalid Student ID");
+      setAlertType("error");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 1800);
+      return false;
+    }
+
+    setError("");
+    return true;
+  };
 
   const handleLogin = async () => {
-    if (id === "" || password === "") {
-      setAlertMessage("Please enter both Student ID and Password.");
-      setAlertType("error");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 2500);
-      return;
-    } else if (!/^\d+$/.test(id)) {
-      setAlertMessage("Student ID must contain only numbers.");
-      setAlertType("error");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 2500);
-      return;
-    } else if (typeof password !== "string" || password.length === 0) {
-      setAlertMessage("Password must be a valid string.");
-      setAlertType("error");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 2500);
-      return;
-    } else if (id.length !== 8) {
-      setAlertMessage("Invalid Student ID.");
-      setAlertType("error");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 2500);
-      return;
-    } else {
+    if (validate()) {
       setAlertMessage("Login successful!");
       setAlertType("success");
       setShowAlert(true);
 
       setTimeout(() => {
         router.push("/attendance/test");
-      }, 3000);
+      }, 1800);
     }
   };
+
   return (
     <div className="min-h-screen w-full grid">
       <div className="min-h-screen flex flex-col items-center justify-center -mt-10 bg-gradient-to-t from-white from-67% to-kmitl font-sans">
