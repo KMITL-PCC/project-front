@@ -41,7 +41,7 @@ export default function AttendanceModal() {
 
         {/* รายการ */}
         <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4 text-black">
-          <Item icon="/check.svg" text="Verify your student identity" />
+          <Item icon="/check(1).svg" text="Verify your student identity" />
           <Item icon="/notifications.svg" text="Get attendance notifications" />
         </div>
 
