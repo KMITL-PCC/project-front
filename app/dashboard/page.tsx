@@ -13,7 +13,9 @@ import {
   addDays,
 } from 'date-fns';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { ChevronDown, Monitor, Clock, User, Presentation, FileSpreadsheet } from 'lucide-react';
+import { ChevronDown, Clock, Presentation, FileSpreadsheet } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const datain = [
   { value: 60, name: 'Total Student', isMain: true, progress: 100 },
@@ -76,6 +78,21 @@ export default function HomePage() {
   const [selectedRoom, setSelectedRoom] = useState('B 218');
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const exportToExcel = () => {
+    // selected students array
+    const worksheet = XLSX.utils.json_to_sheet(students);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Students name report ");
+
+    const dateStr = format(selectedDate, 'yyyy-MM-dd');
+    // file name when download
+    const fileName = `students_report_${selectedRoom}_${dateStr}`;
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const dataBlob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(dataBlob, `${fileName}.xlsx`);
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -234,6 +251,7 @@ export default function HomePage() {
                 <h1 className='text-[20px] font-semibold text-[#FE6136]'>Total Student</h1>
                 <button
                   className="mr-8 p-1.5 rounded-lg hover:bg-[#F5F5F5] transition-colors duration-200 group"
+                  onClick={exportToExcel}
                   title="Export Excel"
                 >
                   <FileSpreadsheet
@@ -245,14 +263,13 @@ export default function HomePage() {
               </div>
 
               {/* Table Header */}
-              <div className='p-3 max-h-65 overflow-y-auto custom-scrollbar'>
-                <div className="grid grid-cols-4 px-4 text-[#FE6136] font-medium mr-8 mb-2">
-                  <div>Name</div>
-                  <div>Student Id</div>
-                  <div className="text-center">Time in</div>
-                  <div className="text-center">Time out</div>
-                </div>
-
+              <div className="grid grid-cols-4 px-4 text-[#FE6136] font-medium mr-10 mb-2 ">
+                <div>Name</div>
+                <div>Student Id</div>
+                <div className="text-center">Time in</div>
+                <div className="text-center">Time out</div>
+              </div>
+              <div className=' max-h-55 overflow-y-auto custom-scrollbar '>
                 {/* Table Body */}
                 <div className="space-y-2">
                   {students.map((student, index) => (
@@ -325,7 +342,7 @@ export default function HomePage() {
             <div className="py-0.5 pl-4 pt-7 text-sm text-[#203864] text-start row-span-1 font-bold">
               {format(selectedDate, 'dd MMMM')}
             </div>
-            <div className="grid grid-rows-2 gap-1 h-full ml-2 mr-2">
+            <div className="grid grid-rows-2 gap-3 h-full px-2 pb-2">
               <div className="rounded-3xl bg-[#E0E6F2] border border-[#D0D7E4] relative ">
                 <div className='h-40 w-full absolute '>
                   <div className='absolute inset-0 flex justify-center pointer-events-none'>
