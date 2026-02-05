@@ -7,6 +7,7 @@ import { StudentProfile } from "./StudentProfile";
 import { RoomHeader } from "./RoomHeader";
 import { PrivacyModal } from "./PrivacyModal";
 import { CheckStatusModal } from "../checkin/checkinnn";
+import AddFriendLINE from "../addfriend/addfriend";
 
 type Props = {
   room: string;
@@ -23,6 +24,7 @@ export function AttenDance({ room }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"checkin" | "checkout">("checkin");
+  const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
 
   const checkIn = async () => {
     const res = await fetch("/api/check-in", {
@@ -96,6 +98,7 @@ export function AttenDance({ room }: Props) {
         setStatus("checked_in");
         setModalType("checkin");
         setIsModalOpen(true);
+        setIsAddFriendOpen(true);
       } else if (status === "checked_in") {
         // await checkOut();
         setStatus("checked_out");
@@ -164,6 +167,11 @@ export function AttenDance({ room }: Props) {
         room={room}
         time={time}
         studentName="Mr. Shadow Milk"
+      />
+
+      <AddFriendLINE
+        open={isAddFriendOpen}
+        onClose={() => setIsAddFriendOpen(false)}
       />
     </section>
   );

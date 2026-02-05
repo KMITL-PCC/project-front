@@ -3,18 +3,21 @@
 import { useState } from "react";
 import Image from "next/image";
 
-export default function AttendanceModal() {
-  const [open, setOpen] = useState(true);
+type Props = {
+  open: boolean;
+  onClose: () => void;
+};
 
+export default function AddFriendLINE({ open, onClose }: Props) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+    <div className="fixed inset-0 z-50 flex items-center h-full w-full justify-center bg-black/40 px-4">
       <div className="relative w-full max-w-sm sm:max-w-md rounded-2xl bg-white p-5 sm:p-6 shadow-xl">
         {/* ปุ่มปิด */}
         <button
-          onClick={() => setOpen(false)}
-          className="absolute right-3 top-3 text-gray-400 text-lg drop-shadow-sm"
+          onClick={onClose}
+          className="absolute right-3 top-3 text-gray-400 text-lg drop-shadow-sm cursor-pointer"
         >
           ✕
         </button>
@@ -25,7 +28,7 @@ export default function AttendanceModal() {
         </div>
 
         {/* หัวข้อ */}
-        <h2 className="mt-6 sm:mt-8 text-center text-lg sm:text-xl font-medium text-black">
+        <h2 className="mt-6 sm:mt-8 text-center text-lg sm:text-xl font-semibold text-black">
           Almost there!
         </h2>
 
@@ -41,15 +44,22 @@ export default function AttendanceModal() {
 
         {/* รายการ */}
         <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4 text-black">
-          <Item  icon="/check(1).svg" text="Verify your student identity" />
+          <Item icon="/check(1).svg" text="Verify your student identity" />
           <Item icon="/notifications.svg" text="Get attendance notifications" />
         </div>
 
         {/* ปุ่ม Add Friend */}
-        <button className="mt-8 sm:mt-10 mx-auto flex w-full max-w-xs items-center justify-center gap-3 rounded-full bg-[#05C655] py-2.5 sm:py-3 text-white">
+        <button className="mt-8 sm:mt-10 mx-auto flex w-full max-w-xs items-center justify-center gap-3 rounded-full bg-[#05C655] py-2.5 sm:py-3 text-white cursor-pointer hover:bg-[#04A64A] active:bg-[#048A3C] transition"
+                // onClick={} 
+                >
           <div className="mx-auto flex items-center justify-center gap-3">
-            <Image src="/profile_add.png" alt="Add friend" width={32} height={32} />
-          <span className="text-sm sm:text-base font-medium leading-none">
+            <Image
+              src="/profile_add.png"
+              alt="Add friend"
+              width={32}
+              height={32}
+            />
+            <span className="text-sm sm:text-base font-medium leading-none">
               Add Friend
             </span>
           </div>
@@ -57,7 +67,7 @@ export default function AttendanceModal() {
 
         <p
           className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-400 cursor-pointer"
-          onClick={() => setOpen(false)}
+          onClick={onClose}
         >
           Remind me later.
         </p>
