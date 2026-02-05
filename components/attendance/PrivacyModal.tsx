@@ -10,7 +10,7 @@ export function PrivacyModal() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <span className="text-orange-500 underline cursor-pointer">
+        <span className="text-kmitl underline cursor-pointer">
           Privacy Policy
         </span>
       </DialogTrigger>
@@ -18,7 +18,7 @@ export function PrivacyModal() {
       <DialogContent className="max-w-87.5 rounded-[2.5rem] bg-white p-0 border-none shadow-2xl overflow-hidden gap-0">
         
         <DialogHeader className="p-6 pb-4 border-b border-gray-100">
-          <DialogTitle className="text-center text-xl font-bold text-orange-500 uppercase tracking-tight">
+          <DialogTitle className="text-center text-xl font-bold text-kmitl uppercase tracking-tight">
             PRIVACY POLICY
           </DialogTitle>
         </DialogHeader>

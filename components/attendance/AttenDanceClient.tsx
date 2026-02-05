@@ -6,6 +6,7 @@ import { StatusBadge } from "./StatusBadge";
 import { StudentProfile } from "./StudentProfile";
 import { RoomHeader } from "./RoomHeader";
 import { PrivacyModal } from "./PrivacyModal";
+import { CheckStatusModal } from "../checkin/checkinnn";
 
 type Props = {
   room: string;
@@ -20,6 +21,8 @@ export function AttenDance({ room }: Props) {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"checkin" | "checkout">("checkin");
 
   const checkIn = async () => {
     const res = await fetch("/api/check-in", {
@@ -56,12 +59,11 @@ export function AttenDance({ room }: Props) {
   const buttonLabel =
     // status === "error"
     //   ? "RETRY"
-     status === "pending"
+    status === "pending"
       ? "CHECK-IN →"
       : status === "checked_in"
         ? "CHECK-OUT →"
         : "DONE";
-        
 
   const title =
     status === "checked_in"
@@ -90,15 +92,20 @@ export function AttenDance({ room }: Props) {
       setError(null);
 
       if (status === "pending") {
-        await checkIn();
+        // await checkIn();
         setStatus("checked_in");
+        setModalType("checkin");
+        setIsModalOpen(true);
       } else if (status === "checked_in") {
-        await checkOut();
+        // await checkOut();
         setStatus("checked_out");
+        setModalType("checkout");
+        setIsModalOpen(true);
       }
     } catch (err) {
       setStatus("error");
       setError("Something went wrong. Please try again.");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -125,7 +132,6 @@ export function AttenDance({ room }: Props) {
         </CardContent>
       </Card>
 
-
       <div className="flex items-start gap-2 text-sm text-gray-500">
         <input
           type="checkbox"
@@ -143,13 +149,22 @@ export function AttenDance({ room }: Props) {
         onClick={handleAction}
         className="
           w-full rounded-xl py-3 font-semibold text-white
-          bg-orange-500 hover:bg-orange-600
+          bg-kmitl hover:bg-orange-500 active:bg-orange-600
           disabled:bg-orange-300 disabled:cursor-not-allowed
           transition
         "
       >
         {buttonLabel}
       </button>
+
+      <CheckStatusModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        type={modalType}
+        room={room}
+        time={time}
+        studentName="Mr. Shadow Milk"
+      />
     </section>
   );
 }
