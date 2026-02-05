@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect } from "react";
 
 type Props = {
   open: boolean;
@@ -20,12 +21,34 @@ export function CheckStatusModal({
   time,
   studentName,
 }: Props) {
+  // จัดการล็อกการเลื่อนของพื้นหลังเมื่อป๊อปอัพเปิด
+  useEffect(() => {
+    if (open) {
+      // ล็อกทั้ง html และ body เพื่อความชัวร์ (แก้ปัญหาหน้า Check-in เลื่อน)
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+      
+      // เพิ่มเติมสำหรับมือถือ: ป้องกันการลากนิ้ว (Touch Scroll)
+      document.body.style.touchAction = "none";
+    } else {
+      // คืนค่าเมื่อปิด
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    }
+
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    };
+  }, [open]);
   if (!open) return null;
 
   const isCheckIn = type === "checkin";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
       <div className="w-full max-w-sm sm:max-w-md rounded-2xl bg-white p-5 sm:p-6 shadow-xl flex flex-col">
         {/* ===== Content ===== */}
         <div className="flex-1">

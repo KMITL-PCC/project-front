@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 type Props = {
@@ -9,6 +9,20 @@ type Props = {
 };
 
 export default function AddFriendLINE({ open, onClose }: Props) {
+  // เวลา ป๊อปอัพ เด้งมาจะเลื่อนหน้าขึ้นลงไม่ได้ 
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    // กันเหนียวๆ ให้มันเลื่อนได้เหมือนตอนแรกๆ
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [open]);
+
   if (!open) return null;
 
   return (

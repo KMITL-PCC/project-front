@@ -73,12 +73,13 @@ export default function LoginPage() {
           src="/KMITL.png"
           alt="logo"
           className="h-26 mb-4 drop-shadow-md lg:h-40 md:h-36 w-auto"
+          priority
         />
 
         <div className="max-w-sm w-2/3">
           <div className="flex justify-center items-center mb-4">
             <h1 className=" font-bold text-gray-700 text-sm">SIGN IN</h1>
-            <Image width={20} height={20} src="/ceolgo.png" alt="ce logo" className="h-5 ml-2 w-auto" />
+            <Image width={20} height={20} src="/ceolgo.png" alt="ce logo" className="w-auto ml-2" style={{ height: 'auto' }}/>
           </div>
 
           <div className="space-y-4">
