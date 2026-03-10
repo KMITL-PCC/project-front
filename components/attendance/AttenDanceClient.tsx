@@ -7,7 +7,7 @@ import { StudentProfile } from "./StudentProfile";
 import { RoomHeader } from "./RoomHeader";
 import { PrivacyModal } from "./PrivacyModal";
 import { CheckStatusModal } from "../checkin/checkinnn";
-import AddFriendLINE from "../addfriend/addfriend";
+
 
 type Props = {
   room: string;
@@ -169,10 +169,6 @@ export function AttenDance({ room }: Props) {
         studentName="Mr. Shadow Milk"
       />
 
-      <AddFriendLINE
-        open={isAddFriendOpen}
-        onClose={() => setIsAddFriendOpen(false)}
-      />
     </section>
   );
 }
