@@ -1,0 +1,39 @@
+/* ตกแต่งกล่องปฏิทินหลัก */
+.custom-calendar-style {
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  font-family: "Inter", sans-serif;
+  overflow: hidden;
+}
+
+/* ตกแต่งส่วนหัว (Header) */
+.react-datepicker__header {
+  background-color: #fe6136 !important; /* Indigo-600 */
+  border-bottom: none !important;
+  padding-top: 10px !important;
+}
+
+.react-datepicker__current-month {
+  color: white !important;
+  font-weight: bold;
+}
+
+/* เปลี่ยนสีตัวหนังสือวันอาทิตย์-จันทร์ */
+.react-datepicker__day-name {
+  color: black;
+  font-weight: bold;
+}
+
+/* ตกแต่งวันที่เราเลือก (Selected Day) */
+.react-datepicker__day--selected {
+  background-color: #fbbf24 !important; /* Amber-400 */
+  border-radius: 50% !important;
+  color: black !important;
+}
+
+/* ตกแต่งวันที่เอาเมาส์ไปวาง (Hover) */
+.react-datepicker__day:hover {
+  border-radius: 50% !important;
+  background-color: #e0e7ff !important;
+}

@@ -1,470 +1,284 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import './styles/scrollbar.css';
+import './styles/calendar.css';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { ChevronDown, Search, FileSpreadsheet, Presentation, Clock } from 'lucide-react';
 import {
-  format,
-  addMonths,
-  subMonths,
-  startOfMonth,
-  startOfWeek,
-  isSameMonth,
-  isSameDay,
-  addDays,
-} from 'date-fns';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { ChevronDown, Clock, Presentation, FileSpreadsheet } from 'lucide-react';
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
-const datain = [
-  { value: 60, name: 'Total Student', isMain: true, progress: 100 },
-  { value: 58, name: '00:00 - 11:59', isMain: false, progress: 96.67 },
-  { value: 55, name: '12:00 - 16:00', isMain: false, progress: 91.67 },
-  { value: 57, name: '17:00 - 23:59', isMain: false, progress: 95 },
+const MOCK_DATA = [
+  { id: '66200xxx', name: 'Kaki Miku', room: 'B218', checkIn: '10:15', checkOut: '12:15' },
+  { id: '66200xxx', name: 'Tata', room: 'B218', checkIn: '10:16', checkOut: '12:17' },
+  { id: '66200xxx', name: 'Polymale', room: 'B219', checkIn: '17:15', checkOut: '20:12' },
+  { id: '66200xxx', name: 'UwU', room: 'B219', checkIn: '17:16', checkOut: '20:11' },
 ];
 
-const dataout = [
-  { value: 60, name: 'Total Student', isMain: true, progress: 100 },
-  { value: 48, name: '00:00 - 11:59', isMain: false, progress: 80 },
-  { value: 50, name: '12:00 - 16:00', isMain: false, progress: 83.33 },
-  { value: 47, name: '17:00 - 23:59', isMain: false, progress: 78.33 },
+const data = [
+  { time: '08:00', students: 10 },
+  { time: '09:00', students: 45 },
+  { time: '10:00', students: 58 },
+  { time: '11:00', students: 60 },
+  { time: '12:00', students: 55 },
+  { time: '13:00', students: 58 },
+  { time: '14:00', students: 50 },
 ];
 
-const StatCard = ({ item, type }: { item: any, type: 'in' | 'out' }) => (
-  <div className={`relative p-3 rounded-2xl flex flex-col justify-between h-42 min-w-[100px] ${type === 'in' ? 'bg-[#E0E6F2] border border-[#D0D7E4]' : 'bg-[#FFE2DB] border border-[#F5C2C7]'
-    }`}>
-    {/* Icon Top Right */}
-    <div className="absolute top-4 right-4 text-[#203864]">
-      {item.isMain ? <Presentation size={20} strokeWidth={3} /> : <Clock size={20} strokeWidth={3} />}
-    </div>
-    {/* Center Content */}
-    <div className="mt-10">
-      <h2 className="text-[16px] font-bold text-[#203864] mb-2">{item.value}</h2>
-      <p className={`text-[12px] font-semibold ${type === 'in' ? 'text-orange-500' : 'text-orange-600'
-        }`}>
-        {item.name}
-      </p>
-    </div>
-    {/* Progress Footer */}
-    <div className="w-full mt-4">
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-[10px] text-gray-500">Progress</span>
-        <span className="text-[10px] text-gray-500">{item.progress}%</span>
-      </div>
-      <div className="w-full bg-gray-300 rounded-full h-2.5 overflow-hidden">
-        <div
-          className="bg-green-600 h-full rounded-full transition-all duration-500"
-          style={{ width: `${item.progress}%` }}
-        />
-      </div>
-    </div>
-  </div>
-);
+function Dashboard() {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRoom, setSelectedRoom] = useState("All");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
 
-const students = [
-  { name: "John Doe", id: "66200xxx", in: "10:15", out: "12:15" },
-  { name: "Jane Eleven", id: "66200xxx", in: "10:16", out: "12:17" },
-  { name: "Mike Kawazaki", id: "66200xxx", in: "17:15", out: "20:12" },
-  { name: "Vecna Vasit", id: "66200xxx", in: "17:16", out: "20:11" },
-  { name: "Vecna Vasit", id: "66200xxx", in: "17:16", out: "20:11" },
-  { name: "Vecna Vasit", id: "66200xxx", in: "17:16", out: "20:11" },
-];
+  // Filter and search logic
+  const filteredStudents = MOCK_DATA.filter(item => {
+    const matchesSearch =
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.id.includes(searchTerm) ||
+      item.room.includes(searchTerm) ||
+      item.checkIn.includes(searchTerm) ||
+      item.checkOut.includes(searchTerm);
 
-const COLORS = ['#66C975', '#FADB60', '#CE5353'];
+    const matchesRoom = selectedRoom === "All" || item.room === selectedRoom;
 
-export default function HomePage() {
-  const rooms = ['B 218', 'B 219', 'B 220', 'C 101'];
-  const [selectedRoom, setSelectedRoom] = useState('B 218');
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const exportToExcel = () => {
-    // selected students array
-    const worksheet = XLSX.utils.json_to_sheet(students);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Students name report ");
-
-    const dateStr = format(selectedDate, 'yyyy-MM-dd');
-    // file name when download
-    const fileName = `students_report_${selectedRoom}_${dateStr}`;
-
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const dataBlob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-    saveAs(dataBlob, `${fileName}.xlsx`);
-  };
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
-
-
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  const renderCalendarCells = () => {
-    const monthStart = startOfMonth(currentMonth);
-    const startDate = startOfWeek(monthStart);
-
-    const calendarDays = Array.from({ length: 42 }, (_, i) =>
-      addDays(startDate, i)
-    );
-
-    return calendarDays.map((day) => {
-      const isSelected = isSameDay(day, selectedDate);
-      const isCurrentMonth = isSameMonth(day, monthStart);
-      const dayLabel = format(day, 'd');
-      const isFirstDay = dayLabel === '1';
-
-      return (
-        <div
-          key={day.toISOString()}
-          onClick={() => {
-            if (isCurrentMonth) setSelectedDate(day);
-          }}
-          className={`relative flex items-center justify-center h-9.5 w-9.5 mx-auto text-sm transition-colors duration-200 mt-0.4
-    ${isCurrentMonth ? 'cursor-pointer w-8 h-8 hover:bg-gray-100 rounded-full' : 'cursor-default opacity-40'}
-  `}
-        >
-
-          {isSelected && (
-            <div className="absolute w-8 h-8 bg-[#4a5d7e] rounded-full" />
-          )}
-
-          <span
-            className={`relative z-10 font-medium ${isSelected
-              ? 'text-white'
-              : isCurrentMonth
-                ? 'text-[#1e3a5f]'
-                : 'text-gray-300'
-              }`}
-          >
-            {dayLabel}
-          </span>
-        </div>
-      );
-    });
-  };
+    return matchesSearch && matchesRoom;
+  });
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden font-sans">
+    <div className='font-sans' >
       {/* HEADER */}
-      <div className="h-20 w-full flex justify-between items-center px-4 shadow-md ">
-        <div className="flex items-center">
-          <img src="KMITL.png" className="h-16" />
-          <img src="ce-logo.png" className="h-16 ml-2" />
+      <div className="h-16 md:h-20 w-full flex justify-between items-center px-3 md:px-4 shadow-md bg-white transition-all duration-300" >
+        <div className="flex items-center gap-2 md:gap-4">
+          <img src="KMITL.png" alt="KMITL" title='KMITL' className="h-8 sm:h-10 md:h-16 w-auto transition-all" />
+          <img src="ce-logo.png" alt="CE03" title='CE03' className="h-8 sm:h-10 md:h-16 w-auto transition-all" />
         </div>
-
-        <div className="text-2xl font-extrabold text-[#203864]">
+        <div className="text-base sm:text-xl md:text-2xl font-extrabold text-[#203864] transition-all">
           Dashboard
         </div>
-
         <div className="flex items-center">
-          <div className="text-right mr-4">
-            <div className="font-bold">Lord Gaydow</div>
-            <div className="text-sm">Professor</div>
+          <div className="hidden sm:block text-right mr-3 md:mr-4">
+            <div className="text-sm md:text-base font-bold">Lord Gaydow</div>
+            <div className="text-xs md:text-sm text-gray-600">Professor</div>
           </div>
           <img
             src="user.jpg"
-            className="w-12 h-12 object-cover rounded-full border"
+            alt="User Profile"
+            className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 object-cover rounded-full border transition-all"
           />
         </div>
       </div>
 
-      {/* MAIN */}
-      <div className="flex-1 grid grid-cols-4 min-h-0">
-        <div className="col-span-3 grid grid-rows-10 min-h-0">
-          {/* SELECT ROOM */}
-          <div ref={dropdownRef} className="row-span-1 flex flex-col justify-center">
-            <button onClick={() => setIsOpen(!isOpen)} className="w-32 h-12 ml-4 rounded-xl flex items-center justify-center text-lg hover:bg-[#F5F5F5] transition-colors duration-200 cursor-pointer">
-              <span className='text-[#FE6136] font-bold'>ROOM</span>
-              <ChevronDown size={24} color='#FE6136' className={`ml-2 transition-transform duration-300  ${isOpen ? 'rotate-180' : 'rotate-0'
-                }`} />
-            </button>
-
-            {isOpen && (
-              <div className="absolute top-35 ml-7 left-0 w-40 bg-white rounded-xl shadow-lg z-50">
-                {rooms.map((room) => (
-                  <div
-                    key={room}
-                    onClick={() => {
-                      setSelectedRoom(room);
-                      setIsOpen(false);
-                    }}
-                    className="px-4 py-2 cursor-pointer hover:bg-orange-100
-                       text-[#203864] font-medium  hover:bg-orange-100 first:hover:rounded-t-xl last:hover:rounded-b-xl"
-                  >
-                    {room}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          {/* CARD TIMEIN&OUT */}
-          <div className="row-span-4">
-            <div className="pl-4 pr-4 pb-4 min-h-screen inset-0 rounded-b-3xl ">
-              <h1 className="text-[24px] font-bold text-center text-orange-600">{selectedRoom}</h1>
-              <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
-                {/* Section: Time In */}
-                <div>
-                  <h3 className="text-[16px] font-bold text-center text-[#203864] mb-2">Time in</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 ml-3">
-                    {datain.map((item, idx) => (
-                      <StatCard key={idx} item={item} type="in" />
-                    ))}
-                  </div>
-                </div>
-
-                {/* Section: Time Out */}
-                <div>
-                  <h3 className="text-[16px] font-bold text-center text-[#203864] mb-2">Time out</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mr-3">
-                    {dataout.map((item, idx) => (
-                      <StatCard key={idx} item={item} type="out" />
-                    ))}
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-          {/* HISTORY */}
-          <div className="row-span-5">
-            <div className="w-full pl-8 pt-4">
-              <div className="mb-2 flex justify-between items-center gap-2 ">
-                <h1 className='text-[20px] font-semibold text-[#FE6136]'>Total Student</h1>
-                <button
-                  className="mr-8 p-1.5 rounded-lg hover:bg-[#F5F5F5] transition-colors duration-200 group"
-                  onClick={exportToExcel}
-                  title="Export Excel"
-                >
-                  <FileSpreadsheet
-                    size={22}
-                    className="text-gray-500 group-hover:text-green-600 transition-colors"
-                  />
-                </button>
-
-              </div>
-
-              {/* Table Header */}
-              <div className="grid grid-cols-4 px-4 text-[#FE6136] font-medium mr-10 mb-2 ">
-                <div>Name</div>
-                <div>Student Id</div>
-                <div className="text-center">Time in</div>
-                <div className="text-center">Time out</div>
-              </div>
-              <div className=' max-h-55 overflow-y-auto custom-scrollbar '>
-                {/* Table Body */}
-                <div className="space-y-2">
-                  {students.map((student, index) => (
-                    <div
-                      key={index}
-                      className={`grid grid-cols-4 items-center px-4 py-3 rounded-lg mr-8
-              ${index % 2 === 0 ? "bg-[#E0E6F2]" : "bg-white"}`}
-                    >
-                      <div className="font-medium text-slate-700">
-                        {student.name}
-                      </div>
-                      <div className="text-slate-700">
-                        {student.id}
-                      </div>
-                      <div className="text-center text-slate-700">
-                        {student.in}
-                      </div>
-                      <div className="text-center text-slate-700">
-                        {student.out}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Selection Date */}
+      <div className="flex flex-col items-start p-3">
+        <div className="relative">
+          <DatePicker
+            selected={selectedDate}
+            onChange={(date) => setSelectedDate(date)}
+            customInput={
+              <button className="flex items-center gap-2 px-4 py-2 border-1 border-[#FE6136] hover:bg-[#F5F5F5] text-[#FE6136] rounded-lg transition-all">
+                <span>{selectedDate ? selectedDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : "Select date"}</span>
+                <ChevronDown className="w-5 h-5" />
+              </button>
+            }
+            calendarClassName="custom-calendar-style ml-30"
+          />
         </div>
-        <div className="grid grid-rows-7 h-full min-h-0 ">
-          {/* CALENDAR */}
-          <div className="row-span-3 p-3 pb-0.5 grid grid-rows-[auto_auto_1fr] min-h-0">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="ml-3 text-xl font-bold text-[#1e3a5f]">
-                {format(currentMonth, 'MMMM yyyy')}
-              </h3>
-              {/* <div className="hidden">hidden</div> */}
+      </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                  className="p-1 hover:bg-gray-200 rounded"
-                >
-                  <ChevronDown size={24} color='#757575' className={`transition-transform duration-300 rotate-90`} />
-                </button>
-                <button
-                  onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                  className="p-1 hover:bg-gray-200 rounded"
-                >
-                  <ChevronDown size={24} color='#757575' className={`transition-transform duration-300 rotate-270`} />
-                </button>
-              </div>
+      {/* Room Number */}
+      <div className="mb-8">
+        <h2 className="text-[#FE6136] font-bold text-md text-center md:text-center uppercase tracking-wide">
+          Chart Room {selectedRoom === "All" ? "Overview" : selectedRoom}
+        </h2>
+      </div>
+
+      {/* chart */}
+      <div className="flex flex-row justify-around items-center gap-2 md:gap-2 mb-7 bg-white rounded-2xl block md:hidden">
+        <StatCircle percentage={45} label="Total Student" color="text-orange-500" stroke="stroke-orange-500" sub=" peoples" />
+        <StatCircle percentage={45} label="Check out" color="text-teal-500" stroke="stroke-teal-500" sub=" peoples" />
+        <StatCircle percentage={40} label="Check in" color="text-slate-700" stroke="stroke-slate-700" sub=" peoples" />
+      </div>
+
+      {/* Line Chart for desktop and tablet */}
+      <div className="hidden md:flex flex-row gap-6 p-6 w-full max-w-6xl mx-auto bg-white rounded-xl">
+        <div className="flex-1 h-[350px] w-full border border-gray-100 rounded-3xl p-6">
+          <ResponsiveContainer width="100%" height="90%">
+            <LineChart data={data} margin={{ top: 5, right: 20, bottom: 50, left: -20 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+              <XAxis
+                dataKey="time"
+                stroke="#9ca3af"
+                fontSize={14}
+                tickLine={false}
+                axisLine={false}
+                dy={10}
+              />
+              <YAxis
+                stroke="#9ca3af"
+                fontSize={14}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: '12px',
+                  border: 'none',
+                  boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                }}
+                formatter={(value) => [`${value} คน`, 'จำนวนผู้ใช้งาน']}
+                labelStyle={{ color: '#1f2937', fontWeight: 'bold', marginBottom: '8px' }}
+              />
+              <Line
+                type="monotone"
+                dataKey="students"
+                stroke="#1e3a8a"
+                strokeWidth={4}
+                dot={{ r: 5, fill: '#1e3a8a', strokeWidth: 2, stroke: '#fff' }}
+                activeDot={{ r: 8, fill: '#ff5a36', stroke: '#fff', strokeWidth: 3 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* ส่วนขวา: การ์ดสถิติ (จัดเรียงอยู่ข้างๆ กราฟ) */}
+        <div className="flex flex-col gap-5 w-[220px] shrink-0">
+
+          {/* Card 1: Total Student */}
+          <div className="bg-[#e8edf5] rounded-3xl p-6 relative h-full flex flex-col justify-end min-h-[140px]">
+            <div className="absolute top-5 right-5">
+              <Presentation className="text-[#1e3a8a] w-7 h-7" strokeWidth={2.5} />
             </div>
+            <div>
+              <div className="text-[40px] leading-none font-bold text-[#1e3a8a] mb-2">60</div>
+              <div className="text-[#ff5a36] text-sm font-semibold tracking-wide">Total Student</div>
+            </div>
+          </div>
 
-            <div className="grid grid-cols-7 overflow-hidden">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thr', 'Fri', 'Sat'].map((d) => (
-                <div
-                  key={d}
-                  className="text-center text-xs font-semibold text-gray-400 uppercase"
-                >
-                  {d}
-                </div>
+          {/* Card 2: Check-in */}
+          <div className="bg-[#e8edf5] rounded-3xl p-6 relative h-full flex flex-col justify-end min-h-[140px]">
+            <div className="absolute top-5 right-5">
+              <Clock className="text-[#1e3a8a] w-7 h-7" strokeWidth={2.5} />
+            </div>
+            <div>
+              <div className="text-[40px] leading-none font-bold text-[#1e3a8a] mb-2">58</div>
+              <div className="text-[#ff5a36] text-sm font-semibold tracking-wide">check-in</div>
+            </div>
+          </div>
+
+          {/* Card 3: Check-out */}
+          <div className="bg-[#e8edf5] rounded-3xl p-6 relative h-full flex flex-col justify-end min-h-[140px]">
+            <div className="absolute top-5 right-5">
+              <Clock className="text-[#1e3a8a] w-7 h-7" strokeWidth={2.5} />
+            </div>
+            <div>
+              <div className="text-[40px] leading-none font-bold text-[#1e3a8a] mb-2">55</div>
+              <div className="text-[#ff5a36] text-sm font-semibold tracking-wide">check-out</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+      {/* Search & Filter Bar */}
+      <div className="flex items-center gap-3 mb-8 h-12">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search Name, ID, or Time..."
+            className="w-full pl-10 pr-4 py-2.5 bg-[#E8EEFB] rounded-full focus:outline-none"
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="relative flex-1 md:flex-none ">
+          <select
+            value={selectedRoom}
+            onChange={(e) => setSelectedRoom(e.target.value)}
+            className="appearance-none w-full md:w-40 sm:w-10 h-12 bg-[#E8EEFB] px-4 pr-10 rounded-xl font-bold text-[#FE6136] focus:outline-none cursor-pointer border-2 border-transparent hover:border-orange-200 transition-all"
+          >
+            <option value="All">Room: All</option>
+            <option value="B217">B217</option>
+            <option value="B218">B218</option>
+            <option value="B301">B301</option>
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FE6136] pointer-events-none" />
+        </div>
+      </div>
+
+      {/*history list name */}
+      {/* check user role (professor, student) */}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="p-4 border-b">
+          <h3 className="text-[#FE6136] font-bold">Total Student</h3>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="text-[#FE6136] text-sm md:text-base border-b">
+                <th className="hidden sm:block p-4 font-semibold">Name</th>
+                <th className="p-4 font-semibold text-center">Student Id</th>
+                <th className="p-4 font-semibold text-center">Room code</th>
+                <th className="p-4 font-semibold text-center">Check in</th>
+                <th className="p-4 font-semibold text-center">Check out</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStudents.map((row, index) => (
+                <tr key={index} className={`border-b last:border-0 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-[#E8EEFB]/30'}`}>
+                  <td className="hidden sm:block p-4 font-medium text-sm md:text-base">{row.name}</td>
+                  <td className="p-4 text-center text-gray-600 text-sm">{row.id}</td>
+                  <td className="p-4 text-center text-gray-600 text-sm">{row.room}</td>
+                  <td className="p-4 text-center font-semibold text-sm">{row.checkIn}</td>
+                  <td className="p-4 text-center font-semibold text-sm">{row.checkOut}</td>
+                </tr>
               ))}
-            </div>
-
-            <div className="grid grid-cols-7 flex-1 min-h-0 items-center">
-              {renderCalendarCells()}
-            </div>
-          </div>
-          {/* PIE CHART */}
-          <div className="row-span-4 grid grid-rows-[auto_1fr] h-full ">
-            <div className="py-0.5 pl-4 pt-7 text-sm text-[#203864] text-start row-span-1 font-bold">
-              {format(selectedDate, 'dd MMMM')}
-            </div>
-            <div className="grid grid-rows-2 gap-3 h-full px-2 pb-2">
-              <div className="rounded-3xl bg-[#E0E6F2] border border-[#D0D7E4] relative ">
-                <div className='h-40 w-full absolute '>
-                  <div className='absolute inset-0 flex justify-center pointer-events-none'>
-                    <h1 className='font-bold text-[#203864]'>Time in</h1>
-                  </div>
-                  <div>
-                    <ResponsiveContainer width="50%" height="100%" className="absolute">
-                      <PieChart>
-                        <Tooltip
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-white px-3 py-2 border rounded-xl shadow-md">
-                                  <p className="text-xs font-bold text-[#203864]">
-                                    {payload[0].name}
-                                  </p>
-                                  <p className="text-sm font-extrabold" style={{ color: payload[0].payload.fill }}>
-                                    Total : {payload[0].value}
-                                  </p>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <Pie
-                          data={datain.slice(1)}
-                          dataKey="value"
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={35}
-                          outerRadius={65}
-                          paddingAngle={0}
-                          stroke="none"
-                          strokeWidth={0}
-                          activeShape={{ stroke: '#fff', strokeWidth: 2 }}
-                        >
-                          {datain.slice(1).map((_, index) => (
-                            <Cell key={index} fill={COLORS[index]} />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="w-1/2 flex flex-col items-center gap-3 ml-40 mt-10">
-                    {datain.slice(1).map((entry, index) => (
-                      <div key={index} className="flex items-center gap-4">
-                        <div
-                          className="w-5 h-5 rounded-md"
-                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                        />
-                        <span className="text-[12px] font-extrabold" style={{ color: COLORS[index % COLORS.length] }}>
-                          {entry.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-3xl bg-[#FFE2DB] border border-[#F5C2C7] relative ">
-                <div className='h-40 w-full absolute '>
-                  <div className='absolute inset-0 flex justify-center pointer-events-none'>
-                    <h1 className='font-bold text-[#203864]'>Time out</h1>
-                  </div>
-                  <div>
-                    <ResponsiveContainer width="50%" height="100%" className="absolute">
-                      <PieChart>
-                        <Tooltip
-                          content={({ active, payload }) => {
-                            if (active && payload && payload.length) {
-                              return (
-                                <div className="bg-white px-3 py-2 border rounded-xl shadow-md">
-                                  <p className="text-xs font-bold text-[#203864]">
-                                    {payload[0].name}
-                                  </p>
-                                  <p className="text-sm font-extrabold" style={{ color: payload[0].payload.fill }}>
-                                    Total : {payload[0].value}
-                                  </p>
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <Pie
-                          data={dataout.slice(1)}
-                          dataKey="value"
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={35}
-                          outerRadius={65}
-                          paddingAngle={0}
-                          stroke="none"
-                          strokeWidth={0}
-                          activeShape={{ stroke: '#fff', strokeWidth: 2 }}
-                        >
-                          {dataout.slice(1).map((_, index) => (
-                            <Cell key={index} fill={COLORS[index]} />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                  <div className="w-1/2 flex flex-col items-center gap-3 ml-40 mt-10">
-                    {dataout.slice(1).map((entry, index) => (
-                      <div key={index} className="flex items-center gap-4">
-                        <div
-                          className="w-5 h-5 rounded-md"
-                          style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                        />
-                        <span className="text-[12px] font-extrabold" style={{ color: COLORS[index % COLORS.length] }}>
-                          {entry.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
+  )
+}
+
+function StatCircle({ percentage, label, color, stroke, sub }: any) {
+  const radius = 45;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percentage / 100) * circumference;
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative flex items-center justify-center mb-2">
+        <svg className="w-28 h-28 md:w-32 md:h-32 transform -rotate-90">
+          <circle cx="50%" cy="50%" r={radius} stroke="currentColor" strokeWidth="8" fill="transparent" className="text-gray-100" />
+          <circle
+            cx="50%" cy="50%" r={radius} stroke="currentColor" strokeWidth="8" fill="transparent"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className={`${stroke} transition-all duration-1000`}
+          />
+        </svg>
+        <div className="absolute flex flex-col items-center">
+          <span className="text-xl md:text-2xl font-bold">{percentage}</span>
+          <span className="text-[10px] text-gray-400 font-medium">{sub}</span>
+        </div>
+      </div>
+      <span className={`${color}`}>{label}</span>
+    </div>
   );
 }
+
+export default Dashboard
