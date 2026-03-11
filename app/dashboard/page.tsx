@@ -1,10 +1,16 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import './styles/calendar.css';
+import React, { useState, useEffect, useRef } from "react";
+import "./styles/calendar.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { ChevronDown, Search, FileSpreadsheet, Presentation, Clock } from 'lucide-react';
+import {
+  ChevronDown,
+  Search,
+  FileSpreadsheet,
+  Presentation,
+  Clock,
+} from "lucide-react";
 import {
   LineChart,
   Line,
@@ -12,27 +18,68 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend, // <-- Add this
   ResponsiveContainer,
-} from 'recharts';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
+} from "recharts";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const MOCK_DATA = [
-  { id: '66200xxx', name: 'Kaki Miku', room: 'B218', checkIn: '10:15', checkOut: '12:15' },
-  { id: '66200xxx', name: 'Tata', room: 'B218', checkIn: '10:16', checkOut: '12:17' },
-  { id: '66200xxx', name: 'Polymale', room: 'B219', checkIn: '17:15', checkOut: '20:12' },
-  { id: '66200xxx', name: 'UwU', room: 'B219', checkIn: '17:16', checkOut: '20:11' },
+  {
+    id: "66200xxx",
+    name: "Kaki Miku",
+    room: "B218",
+    checkIn: "10:15",
+    checkOut: "12:15",
+  },
+  {
+    id: "66200xxx",
+    name: "Tata",
+    room: "B218",
+    checkIn: "10:16",
+    checkOut: "12:17",
+  },
+  {
+    id: "66200xxx",
+    name: "Polymale",
+    room: "B219",
+    checkIn: "17:15",
+    checkOut: "20:12",
+  },
+  {
+    id: "66200xxx",
+    name: "UwU",
+    room: "B219",
+    checkIn: "17:16",
+    checkOut: "20:11",
+  },
 ];
 
 const data = [
-  { time: '08:00', students: 10 },
-  { time: '09:00', students: 45 },
-  { time: '10:00', students: 58 },
-  { time: '11:00', students: 60 },
-  { time: '12:00', students: 55 },
-  { time: '13:00', students: 58 },
-  { time: '14:00', students: 50 },
+  { time: "08:00", students: 10 },
+  { time: "09:00", students: 45 },
+  { time: "10:00", students: 58 },
+  { time: "11:00", students: 60 },
+  { time: "12:00", students: 0 },
+  { time: "13:00", students: 52 },
+  { time: "14:00", students: 60 },
 ];
+
+const data_out = [
+  { time: "08:00", students: 0 },
+  { time: "09:00", students: 0 },
+  { time: "10:00", students: 0 },
+  { time: "11:00", students: 0 },
+  { time: "12:00", students: 60 },
+  { time: "13:00", students: 0 },
+  { time: "14:00", students: 0 },
+];
+
+const combinedData = data.map((item, index) => ({
+  time: item.time,
+  checkIn: item.students,
+  checkOut: data_out[index].students,
+}));
 
 function Dashboard() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
@@ -42,7 +89,7 @@ function Dashboard() {
   const [hasMounted, setHasMounted] = useState(false);
 
   // Filter and search logic
-  const filteredStudents = MOCK_DATA.filter(item => {
+  const filteredStudents = MOCK_DATA.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.id.includes(searchTerm) ||
@@ -56,12 +103,22 @@ function Dashboard() {
   });
 
   return (
-    <div className='font-sans' >
+    <div className="font-sans">
       {/* HEADER */}
-      <div className="h-16 md:h-20 w-full flex justify-between items-center px-3 md:px-4 shadow-md bg-white transition-all duration-300" >
+      <div className="h-16 md:h-20 w-full flex justify-between items-center px-3 md:px-4 shadow-md bg-white transition-all duration-300">
         <div className="flex items-center gap-2 md:gap-4">
-          <img src="KMITL.png" alt="KMITL" title='KMITL' className="h-8 sm:h-10 md:h-16 w-auto transition-all" />
-          <img src="ce-logo.png" alt="CE03" title='CE03' className="h-8 sm:h-10 md:h-16 w-auto transition-all" />
+          <img
+            src="KMITL.png"
+            alt="KMITL"
+            title="KMITL"
+            className="h-8 sm:h-10 md:h-16 w-auto transition-all"
+          />
+          <img
+            src="ce-logo.png"
+            alt="CE03"
+            title="CE03"
+            className="h-8 sm:h-10 md:h-16 w-auto transition-all"
+          />
         </div>
         <div className="text-base sm:text-xl md:text-2xl font-extrabold text-[#203864] transition-all">
           Dashboard
@@ -87,7 +144,15 @@ function Dashboard() {
             onChange={(date) => setSelectedDate(date)}
             customInput={
               <button className="flex items-center gap-2 px-4 py-2 border-1 border-[#FE6136] hover:bg-[#F5F5F5] text-[#FE6136] rounded-lg transition-all">
-                <span>{selectedDate ? selectedDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : "Select date"}</span>
+                <span>
+                  {selectedDate
+                    ? selectedDate.toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "Select date"}
+                </span>
                 <ChevronDown className="w-5 h-5" />
               </button>
             }
@@ -103,19 +168,60 @@ function Dashboard() {
         </h2>
       </div>
 
-      {/* chart */}
+      {/* phone's cards */}
       <div className="flex flex-row justify-around items-center gap-2 md:gap-2 mb-7 bg-white rounded-2xl block md:hidden">
-        <StatCircle percentage={45} label="Total Student" color="text-orange-500" stroke="stroke-orange-500" sub=" peoples" />
-        <StatCircle percentage={45} label="Check out" color="text-teal-500" stroke="stroke-teal-500" sub=" peoples" />
-        <StatCircle percentage={40} label="Check in" color="text-slate-700" stroke="stroke-slate-700" sub=" peoples" />
+        <StatCircle
+          percentage={45}
+          label="Total Student"
+          color="text-orange-500"
+          stroke="stroke-orange-500"
+          sub=" peoples"
+        />
+        <StatCircle
+          percentage={45}
+          label="Check out"
+          color="text-teal-500"
+          stroke="stroke-teal-500"
+          sub=" peoples"
+        />
+        <StatCircle
+          percentage={40}
+          label="Check in"
+          color="text-slate-700"
+          stroke="stroke-slate-700"
+          sub=" peoples"
+        />
       </div>
 
       {/* Line Chart for desktop and tablet */}
-      <div className="hidden md:flex flex-row gap-6 p-6 w-full max-w-6xl mx-auto bg-white rounded-xl">
-        <div className="flex-1 h-[350px] w-full border border-gray-100 rounded-3xl p-6">
-          <ResponsiveContainer width="100%" height="90%">
-            <LineChart data={data} margin={{ top: 5, right: 20, bottom: 50, left: -20 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
+      <div className="hidden md:flex justify-around gap-[4%] p-6 w-full mx-auto bg-white rounded-xl">
+        <div className="flex-1 self-center h-[350px] w-full border border-gray-100 rounded-3xl p-6">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart
+              data={combinedData}
+              margin={{ top: 10, right: 10, bottom: 10, left: -20 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke="#f3f4f6"
+              />
+
+              <Tooltip
+                contentStyle={{
+                  borderRadius: "12px",
+                  border: "none",
+                  boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                }}
+                labelStyle={{
+                  color: "#1f2937",
+                  fontWeight: "bold",
+                  marginBottom: "8px",
+                }}
+              />
+
+              <Legend verticalAlign="top" height={36} />
+
               <XAxis
                 dataKey="time"
                 stroke="#9ca3af"
@@ -130,38 +236,56 @@ function Dashboard() {
                 tickLine={false}
                 axisLine={false}
               />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: '12px',
-                  border: 'none',
-                  boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+
+              <Line
+                type="monotone"
+                dataKey="checkIn" // match the key in function combinedData
+                name="Check In" // this will be showed in tooltip and legend
+                stroke="#1e3a8a"
+                strokeWidth={4}
+                dot={{ r: 5, fill: "#1e3a8a", strokeWidth: 2, stroke: "#fff" }}
+                activeDot={{
+                  r: 8,
+                  fill: "#ff5a36",
+                  stroke: "#fff",
+                  strokeWidth: 3,
                 }}
-                formatter={(value) => [`${value} คน`, 'จำนวนผู้ใช้งาน']}
-                labelStyle={{ color: '#1f2937', fontWeight: 'bold', marginBottom: '8px' }}
               />
               <Line
                 type="monotone"
-                dataKey="students"
-                stroke="#1e3a8a"
+                dataKey="checkOut" // match the key in function combinedData
+                name="Check Out" // this will be showed in tooltip and legend
+                stroke="#ff5a36"
                 strokeWidth={4}
-                dot={{ r: 5, fill: '#1e3a8a', strokeWidth: 2, stroke: '#fff' }}
-                activeDot={{ r: 8, fill: '#ff5a36', stroke: '#fff', strokeWidth: 3 }}
+                dot={{ r: 5, fill: "#ff5a36", strokeWidth: 2, stroke: "#fff" }}
+                activeDot={{
+                  r: 8,
+                  fill: "#1e3a8a",
+                  stroke: "#fff",
+                  strokeWidth: 3,
+                }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         {/* ส่วนขวา: การ์ดสถิติ (จัดเรียงอยู่ข้างๆ กราฟ) */}
-        <div className="flex flex-col gap-5 w-[220px] shrink-0">
-
+        <div className="flex flewx-row flex flex-col gap-5 w-[220px] shrink-0">
           {/* Card 1: Total Student */}
           <div className="bg-[#e8edf5] rounded-3xl p-6 relative h-full flex flex-col justify-end min-h-[140px]">
             <div className="absolute top-5 right-5">
-              <Presentation className="text-[#1e3a8a] w-7 h-7" strokeWidth={2.5} />
+              <Presentation
+                className="text-[#1e3a8a] w-7 h-7"
+                strokeWidth={2.5}
+              />
             </div>
             <div>
-              <div className="text-[40px] leading-none font-bold text-[#1e3a8a] mb-2">60</div>
-              <div className="text-[#ff5a36] text-sm font-semibold tracking-wide">Total Student</div>
+              <div className="text-[40px] leading-none font-bold text-[#1e3a8a] mb-2">
+                60
+              </div>
+              <div className="text-[#ff5a36] text-sm font-semibold tracking-wide">
+                Total Student
+              </div>
             </div>
           </div>
 
@@ -171,8 +295,12 @@ function Dashboard() {
               <Clock className="text-[#1e3a8a] w-7 h-7" strokeWidth={2.5} />
             </div>
             <div>
-              <div className="text-[40px] leading-none font-bold text-[#1e3a8a] mb-2">58</div>
-              <div className="text-[#ff5a36] text-sm font-semibold tracking-wide">check-in</div>
+              <div className="text-[40px] leading-none font-bold text-[#1e3a8a] mb-2">
+                58
+              </div>
+              <div className="text-[#ff5a36] text-sm font-semibold tracking-wide">
+                check-in
+              </div>
             </div>
           </div>
 
@@ -182,14 +310,16 @@ function Dashboard() {
               <Clock className="text-[#1e3a8a] w-7 h-7" strokeWidth={2.5} />
             </div>
             <div>
-              <div className="text-[40px] leading-none font-bold text-[#1e3a8a] mb-2">55</div>
-              <div className="text-[#ff5a36] text-sm font-semibold tracking-wide">check-out</div>
+              <div className="text-[40px] leading-none font-bold text-[#1e3a8a] mb-2">
+                55
+              </div>
+              <div className="text-[#ff5a36] text-sm font-semibold tracking-wide">
+                check-out
+              </div>
             </div>
           </div>
-
         </div>
       </div>
-
 
       {/* Search & Filter Bar */}
       <div className="flex items-center gap-3 mb-8 h-12">
@@ -238,12 +368,25 @@ function Dashboard() {
             </thead>
             <tbody>
               {filteredStudents.map((row, index) => (
-                <tr key={index} className={`border-b last:border-0 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-[#E8EEFB]/30'}`}>
-                  <td className="hidden sm:block p-4 font-medium text-sm md:text-base">{row.name}</td>
-                  <td className="p-4 text-center text-gray-600 text-sm">{row.id}</td>
-                  <td className="p-4 text-center text-gray-600 text-sm">{row.room}</td>
-                  <td className="p-4 text-center font-semibold text-sm">{row.checkIn}</td>
-                  <td className="p-4 text-center font-semibold text-sm">{row.checkOut}</td>
+                <tr
+                  key={index}
+                  className={`border-b last:border-0 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-[#E8EEFB]/30"}`}
+                >
+                  <td className="hidden sm:block p-4 font-medium text-sm md:text-base">
+                    {row.name}
+                  </td>
+                  <td className="p-4 text-center text-gray-600 text-sm">
+                    {row.id}
+                  </td>
+                  <td className="p-4 text-center text-gray-600 text-sm">
+                    {row.room}
+                  </td>
+                  <td className="p-4 text-center font-semibold text-sm">
+                    {row.checkIn}
+                  </td>
+                  <td className="p-4 text-center font-semibold text-sm">
+                    {row.checkOut}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -251,7 +394,7 @@ function Dashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function StatCircle({ percentage, label, color, stroke, sub }: any) {
@@ -262,9 +405,22 @@ function StatCircle({ percentage, label, color, stroke, sub }: any) {
     <div className="flex flex-col items-center">
       <div className="relative flex items-center justify-center mb-2">
         <svg className="w-28 h-28 md:w-32 md:h-32 transform -rotate-90">
-          <circle cx="50%" cy="50%" r={radius} stroke="currentColor" strokeWidth="8" fill="transparent" className="text-gray-100" />
           <circle
-            cx="50%" cy="50%" r={radius} stroke="currentColor" strokeWidth="8" fill="transparent"
+            cx="50%"
+            cy="50%"
+            r={radius}
+            stroke="currentColor"
+            strokeWidth="8"
+            fill="transparent"
+            className="text-gray-100"
+          />
+          <circle
+            cx="50%"
+            cy="50%"
+            r={radius}
+            stroke="currentColor"
+            strokeWidth="8"
+            fill="transparent"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
@@ -281,4 +437,4 @@ function StatCircle({ percentage, label, color, stroke, sub }: any) {
   );
 }
 
-export default Dashboard
+export default Dashboard;
