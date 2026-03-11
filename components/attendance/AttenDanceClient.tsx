@@ -1,5 +1,5 @@
 "use client";
-
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "../ui/card";
 import { StatusBadge } from "./StatusBadge";
@@ -7,7 +7,7 @@ import { StudentProfile } from "./StudentProfile";
 import { RoomHeader } from "./RoomHeader";
 import { PrivacyModal } from "./PrivacyModal";
 import { CheckStatusModal } from "../checkin/checkinnn";
-
+import { useRouter } from "next/navigation";
 
 type Props = {
   room: string;
@@ -19,12 +19,13 @@ export function AttenDance({ room }: Props) {
   const [status, setStatus] = useState<Status>("pending");
   const [time, setTime] = useState("");
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
-
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"checkin" | "checkout">("checkin");
   const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const checkIn = async () => {
     const res = await fetch("/api/check-in", {
@@ -114,6 +115,14 @@ export function AttenDance({ room }: Props) {
     }
   };
 
+  if (isRedirecting) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
     <section className="w-full max-w-sm space-y-4">
       <h1 className="text-center text-lg font-semibold text-black">{title}</h1>
@@ -162,13 +171,20 @@ export function AttenDance({ room }: Props) {
 
       <CheckStatusModal
         open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          if (status === "checked_out") {
+            setIsRedirecting(true); // the loading spinner UI
+            setTimeout(() => {
+              router.push("/SP");
+            }, 1000);
+          }
+        }}
         type={modalType}
         room={room}
         time={time}
         studentName="Mr. Shadow Milk"
       />
-
     </section>
   );
 }

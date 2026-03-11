@@ -104,7 +104,9 @@ export function CheckStatusModal({
 
         {/* ===== Button ===== */}
         <button
-          onClick={onClose}
+          onClick={() => {
+            onClose();
+          }}
           className="mt-6 sm:mt-8 mx-auto flex w-full max-w-xs items-center justify-center rounded-2xl bg-kmitl hover:bg-orange-500 active:bg-orange-600 py-2.5 sm:py-3 text-sm sm:text-base font-semibold text-white"
         >
           Done
