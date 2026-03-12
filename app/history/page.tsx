@@ -42,6 +42,81 @@ const AttendancePage = () => {
     return `${day}-${month}-${year}`;
   };
 
+useEffect(() => {
+    const loadHistory = async () => {
+      // --- เริ่มส่วน Mock Data ---
+      const mockData: HistoryItem[] = [
+        {
+          status: "checked_in",
+          room_code: "401",
+          student_id: "65012345",
+          user_name: "Somchai Jaidee",
+          timestamp: "2026-03-07T08:15:00+07:00", // วันที่ 7 เช้า 8:15
+        },
+        {
+          status: "checked_out",
+          room_code: "401",
+          student_id: "65012345",
+          user_name: "Somchai Jaidee",
+          timestamp: "2026-03-07T11:30:00+07:00", // วันที่ 7 ออก 11:30
+        },
+        {
+          status: "checked_in",
+          room_code: "LAB-2",
+          student_id: "65012345",
+          user_name: "Somchai Jaidee",
+          timestamp: "2026-03-07T13:00:00+07:00", // วันที่ 7 เข้าแล็บ 13:00
+        },
+        {
+          status: "checked_out",
+          room_code: "LAB-2",
+          student_id: "65012345",
+          user_name: "Somchai Jaidee",
+          timestamp: "2026-03-07T16:00:00+07:00", // วันที่ 7 ออกแล็บ 16:00
+        },
+        {
+          status: "checked_in",
+          room_code: "LIB-01",
+          student_id: "65012345",
+          user_name: "Somchai Jaidee",
+          timestamp: "2026-03-06T10:00:00+07:00", // ของเมื่อวาน (วันที่ 6) เอาไว้เทส Filter
+        }
+      ];
+
+      // เซ็ตข้อมูลลง State เพื่อจำลองว่าโหลดมาจาก API สำเร็จ
+      setHistory(mockData);
+      setAllHistory(mockData);
+
+      if (mockData.length > 0) {
+        setStudentName(mockData[0].user_name);
+        setStudentId(mockData[0].student_id);
+        setStudentMajor("Computer Engineering"); // จำลอง Major ไปด้วยเลยจะได้ไม่เป็นค่าว่าง (-)
+      }
+      // --- จบส่วน Mock Data ---
+
+      /* คอมเมนต์โค้ดของจริงเอาไว้ชั่วคราว เวลาเทสเสร็จค่อยเอาคอมเมนต์ออก
+      try {
+        const res = await fetch("http://localhost:4000/history");
+        const data = await res.json();
+
+        if (data.success) {
+          setHistory(data.data);
+          setAllHistory(data.data);
+
+          if (data.data.length > 0) {
+            setStudentName(data.data[0].user_name);
+            setStudentId(data.data[0].student_id);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      }
+      */
+    };
+
+    loadHistory();
+  }, []);
+
   useEffect(() => {
     const loadHistory = async () => {
       try {
@@ -102,9 +177,8 @@ const AttendancePage = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="text-right text-xs">
+            <div className="text-right text-md">
               <p className="font-bold hidden sm:block">{studentId || "-"}</p>
-              <p className="text-gray-400 hidden sm:block">{role || "-"}</p>
             </div>
 
             <button className="flex items-center justify-center gap-2 border rounded-md px-3 py-1.5 text-sm hover:bg-gray-200 transition cursor-pointer">
@@ -173,11 +247,17 @@ const AttendancePage = () => {
               />
             </div>
           </div>
-
+        
           {/* Logs */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             {history.length === 0 && (
-              <p className="text-gray-500 text-sm">No history found</p>
+              <div className="flex flex-col items-center justify-center bg-gray-50 border border-dashed border-gray-300 rounded-xl p-10 text-center">
+                <div className="bg-gray-200/50 p-3 rounded-full mb-3">
+                  <img src="/calendar.png" alt="No data" className="w-6 h-6 opacity-40 grayscale" />
+                </div>
+                <h3 className="text-slate-700 font-semibold mb-1">No Records Found</h3>
+                <p className="text-gray-500 text-md">There is no attendance history for this date.</p>
+              </div>
             )}
 
             {(showAll ? history : history.slice(0, 3)).map((item, index) => {
@@ -193,12 +273,9 @@ const AttendancePage = () => {
                 <AttendanceItem
                   key={index}
                   location={`Room ${item.room_code}`}
-                  status={
-                    item.status === "checked_in" ? "Checked In" : "Checked Out"
-                  }
+                  status={item.status === "checked_in" ? "Checked In" : "Checked Out"}
                   time={timeString}
                   type={item.status === "checked_in" ? "ENTRY" : "EXIT"}
-                  // Dynamic colors based on status
                   statusColor={
                     item.status === "checked_in"
                       ? "text-emerald-500"
