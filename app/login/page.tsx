@@ -121,7 +121,7 @@ export default function Login() {
       <div className="w-full max-w-[380px] space-y-8 flex flex-col items-center">
         <div className="flex flex-col items-center p-8 md:p-0">
           {/* Logo Section */}
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-4 p-8 md:p-0">
             <Image
               width={240}
               height={100}
@@ -145,7 +145,7 @@ export default function Login() {
                 className={`w-full h-14 justify-between border-2 rounded-xl transition-all shadow-sm font-semibold text-base
                   ${
                     selectedRoom
-                      ? "border-green-500 bg-green-50/30 text-green-700"
+                      ? "border-kmitl bg-green-50/30 text-orange-600"
                       : "border-slate-200 text-slate-600 hover:border-orange-300"
                   }`}
               >
@@ -153,7 +153,7 @@ export default function Login() {
                   <MapPin
                     size={18}
                     className={
-                      selectedRoom ? "text-green-500" : "text-slate-400"
+                      selectedRoom ? "text-kmitl" : "text-slate-400"
                     }
                   />
                   {selectedRoom ? `Room ${selectedRoom}` : "Find your room..."}
@@ -229,7 +229,7 @@ export default function Login() {
                         onClick={handleGuestContinue}
                         disabled={loading}
                         variant="outline"
-                        className="w-full h-12 border-2 border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="w-full h-12 border-2 border-[#f15a22] bg-[#f15a22] text-white font-bold rounded-xl hover:bg-[#d44d1d] shadow-orange-200 transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         {loading ? "Please wait..." : "Continue as Guest"}
                       </Button>
@@ -239,11 +239,6 @@ export default function Login() {
               </div>
             )}
           </div>
-
-          {/* Footer */}
-          <p className="text-center text-[11px] text-slate-300 font-medium uppercase tracking-tighter pt-4">
-            King Mongkut&apos;s Institute of Technology Ladkrabang
-          </p>
         </div>
       </div>
 
