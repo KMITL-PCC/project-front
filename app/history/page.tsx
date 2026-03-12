@@ -1,84 +1,83 @@
-"use client"
+"use client";
 
-import DatePicker from "react-datepicker"
-import "react-datepicker/dist/react-datepicker.css"
-import React, { useEffect, useState, useRef } from "react"
-import { LogOut, Building2, LogOut as LogOutIcon } from "lucide-react"
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import React, { useEffect, useState, useRef } from "react";
+import { LogOut, Building2, LogOut as LogOutIcon } from "lucide-react";
 
 // Added 'timestamp' so we can format the time and filter by date
 type HistoryItem = {
-  status: "checked_in" | "checked_out"
-  room_code: string
-  student_id: string
-  user_name: string
-  timestamp: string 
-}
+  status: "checked_in" | "checked_out";
+  room_code: string;
+  student_id: string;
+  user_name: string;
+  timestamp: string;
+};
 
 type AttendanceItemProps = {
-  location: string
-  status: string
-  time: string
-  type: string
-  statusColor: string
-  isExit?: boolean
-}
+  location: string;
+  status: string;
+  time: string;
+  type: string;
+  statusColor: string;
+  isExit?: boolean;
+};
 
 const AttendancePage = () => {
-  const [showCalendar, setShowCalendar] = useState(false)
-  const [history, setHistory] = useState<HistoryItem[]>([])
-  const [allHistory, setAllHistory] = useState<HistoryItem[]>([])
-  const [studentName, setStudentName] = useState("")
-  const [studentId, setStudentId] = useState("")
-  
-  const [selectedDate, setSelectedDate] = useState("")
-  const [showAll, setShowAll] = useState(false)
-  const dateInputRef = useRef<HTMLInputElement>(null)
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [allHistory, setAllHistory] = useState<HistoryItem[]>([]);
+  const [studentName, setStudentName] = useState("");
+  const [studentId, setStudentId] = useState("");
+
+  const [selectedDate, setSelectedDate] = useState("");
+  const [showAll, setShowAll] = useState(false);
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const loadHistory = async () => {
       try {
-        const res = await fetch("http://localhost:4000/history")
-        const data = await res.json()
+        const res = await fetch("http://localhost:4000/history");
+        const data = await res.json();
 
         if (data.success) {
-          setHistory(data.data)
-          setAllHistory(data.data)
+          setHistory(data.data);
+          setAllHistory(data.data);
 
           if (data.data.length > 0) {
-            setStudentName(data.data[0].user_name)
-            setStudentId(data.data[0].student_id)
+            setStudentName(data.data[0].user_name);
+            setStudentId(data.data[0].student_id);
           }
         }
       } catch (err) {
-        console.error(err)
+        console.error(err);
       }
-    }
+    };
 
-    loadHistory()
-  }, [])
+    loadHistory();
+  }, []);
 
   // Fixed the filtering logic
   useEffect(() => {
     if (!selectedDate) {
-      setHistory(allHistory)
-      return
+      setHistory(allHistory);
+      return;
     }
 
-    const filtered = allHistory.filter(item => {
+    const filtered = allHistory.filter((item) => {
       if (!item.timestamp) return false;
       // Assuming timestamp is an ISO string like "2024-10-25T08:30:00Z"
       const itemDate = new Date(item.timestamp).toISOString().split("T")[0];
       return itemDate === selectedDate;
-    })
+    });
 
-    setHistory(filtered)
-  }, [selectedDate, allHistory])
+    setHistory(filtered);
+  }, [selectedDate, allHistory]);
 
   // Wrapped the entire return in a Fragment <> ... </> to fix the JSX error
   return (
     <>
       <div className="min-h-screen bg-gray-50 font-sans text-slate-700">
-
         {/* Navbar */}
         <nav className="bg-white border-b px-6 py-3 flex justify-between items-center">
           <div className="flex items-center gap-2 font-bold text-blue-900 text-xl">
@@ -102,7 +101,6 @@ const AttendancePage = () => {
         </nav>
 
         <main className="max-w-4xl mx-auto p-6 space-y-6">
-
           {/* Profile Card */}
           <section className="bg-white rounded-xl shadow-sm border p-8 flex flex-col items-center sm:items-start relative overflow-hidden">
             <div className="flex items-baseline gap-3 mb-2">
@@ -128,16 +126,16 @@ const AttendancePage = () => {
             </h2>
 
             <div
-                onClick={() => setShowCalendar(true)}
-                className="text-gray-400 text-xs flex items-center gap-2 uppercase cursor-pointer"
+              onClick={() => setShowCalendar(true)}
+              className="text-gray-400 text-xs flex items-center gap-2 uppercase cursor-pointer"
             >
-                📅 {selectedDate ? selectedDate : "Select Date"}
-                <input
+              📅 {selectedDate ? selectedDate : "Select Date"}
+              <input
                 type="date"
                 ref={dateInputRef}
                 value={selectedDate}
                 onChange={(e) => {
-                  setSelectedDate(e.target.value)
+                  setSelectedDate(e.target.value);
                 }}
                 className="hidden"
               />
@@ -147,63 +145,55 @@ const AttendancePage = () => {
           {/* Logs */}
           <div className="space-y-3">
             {history.length === 0 && (
-              <p className="text-gray-500 text-sm">
-                No history found
-              </p>
+              <p className="text-gray-500 text-sm">No history found</p>
             )}
 
             {(showAll ? history : history.slice(0, 3)).map((item, index) => {
               // Extract the time format (e.g., 08:30 AM)
-              const timeString = item.timestamp 
-                ? new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+              const timeString = item.timestamp
+                ? new Date(item.timestamp).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
                 : "--:--";
 
               return (
                 <AttendanceItem
                   key={index}
                   location={`Room ${item.room_code}`}
-                  status={item.status === "checked_in" ? "Checked In" : "Checked Out"}
+                  status={
+                    item.status === "checked_in" ? "Checked In" : "Checked Out"
+                  }
                   time={timeString}
                   type={item.status === "checked_in" ? "ENTRY" : "EXIT"}
                   // Dynamic colors based on status
-                  statusColor={item.status === "checked_in" ? "text-emerald-500" : "text-rose-500"}
+                  statusColor={
+                    item.status === "checked_in"
+                      ? "text-emerald-500"
+                      : "text-rose-500"
+                  }
                   isExit={item.status === "checked_out"}
                 />
-              )
+              );
             })}
           </div>
 
           {/* Footer Link */}
           <div className="text-center pt-6">
-
-
-
-          {!showAll && (
-
-            <button
-
-              onClick={() => setShowAll(true)}
-
-              className="text-blue-600 font-bold text-sm hover:underline"
-
-            >
-
-              View All Historical Records
-
-            </button>
-
-          )}
-
-
-
-        </div>
-
+            {!showAll && (
+              <button
+                onClick={() => setShowAll(true)}
+                className="text-blue-600 font-bold text-sm hover:underline"
+              >
+                View All Historical Records
+              </button>
+            )}
+          </div>
         </main>
 
         <footer className="text-center py-8 text-gray-400 text-xs">
           © 2024 EduPortal Integrated Systems. All rights reserved.
         </footer>
-
       </div>
 
       {/* Calendar Modal */}
@@ -215,16 +205,18 @@ const AttendancePage = () => {
               onChange={(date: Date | null) => {
                 if (date) {
                   // Standardize to YYYY-MM-DD format
-                  const offset = date.getTimezoneOffset()
-                  const localDate = new Date(date.getTime() - (offset*60*1000))
-                  setSelectedDate(localDate.toISOString().split("T")[0])
+                  const offset = date.getTimezoneOffset();
+                  const localDate = new Date(
+                    date.getTime() - offset * 60 * 1000,
+                  );
+                  setSelectedDate(localDate.toISOString().split("T")[0]);
                 }
-                setShowCalendar(false)
+                setShowCalendar(false);
               }}
               inline
             />
             {/* Added a close button for better UX */}
-            <button 
+            <button
               onClick={() => setShowCalendar(false)}
               className="mt-4 w-full py-2 bg-gray-100 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-200"
             >
@@ -234,8 +226,8 @@ const AttendancePage = () => {
         </div>
       )}
     </>
-  )
-}
+  );
+};
 
 const AttendanceItem = ({
   location,
@@ -243,41 +235,36 @@ const AttendanceItem = ({
   time,
   type,
   statusColor,
-  isExit = false
+  isExit = false,
 }: AttendanceItemProps) => (
   <div className="bg-white border rounded-xl p-4 flex items-center justify-between shadow-sm">
     <div className="flex items-center gap-4">
       <div className="bg-blue-50 p-2.5 rounded-lg">
-        {isExit
-          ? <LogOutIcon className="text-blue-300 w-5 h-5" />
-          : <Building2 className="text-blue-700 w-5 h-5" />
-        }
+        {isExit ? (
+          <LogOutIcon className="text-blue-300 w-5 h-5" />
+        ) : (
+          <Building2 className="text-blue-700 w-5 h-5" />
+        )}
       </div>
 
       <div>
-        <h4 className="font-bold text-slate-800 text-sm">
-          {location}
-        </h4>
+        <h4 className="font-bold text-slate-800 text-sm">{location}</h4>
         <p className="text-[11px]">
           <span className="text-gray-400">
             • Check-{isExit ? "out" : "in"} Status:
           </span>{" "}
-          <span className={`${statusColor} font-bold`}>
-            {status}
-          </span>
+          <span className={`${statusColor} font-bold`}>{status}</span>
         </p>
       </div>
     </div>
 
     <div className="text-right">
-      <div className="text-xl font-bold text-slate-800">
-        {time}
-      </div>
+      <div className="text-xl font-bold text-slate-800">{time}</div>
       <div className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
         {type} TIME
       </div>
     </div>
   </div>
-)
+);
 
-export default AttendancePage
+export default AttendancePage;
