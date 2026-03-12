@@ -23,7 +23,6 @@ import {
   Legend, // <-- Add this
   ResponsiveContainer,
 } from "recharts";
-import { saveAs } from "file-saver";
 
 interface Attendance {
   studentId: string;
