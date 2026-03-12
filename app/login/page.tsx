@@ -43,7 +43,7 @@ export default function LoginPage() {
       return false;
     }
 
-    if (id.length !== 8) {
+    if (id.length !== 30) {
       setError("Invalid Student ID");
       setAlertType("error");
       setShowAlert(true);
