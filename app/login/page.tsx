@@ -3,45 +3,70 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { MapPin, ChevronRight } from "lucide-react";
 
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const [id, setStudentId] = useState("");
+  const [role, setRole] = useState("Personnel");
+  const [open, setOpen] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [alertMessage, setAlertMessage] = useState("");
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertType, setAlertType] = useState("error");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
 
-  const validate = () => {
-    if (!id) {
-      setError("Please enter your Student ID");
-      setAlertType("error");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 1800);
-      return false;
-    }
+  const roomData = [
+    "B101",
+    "B102",
+    "B103",
+    "B104",
+    "B105",
+    "B106",
+    "B107",
+    "B108",
+    "B109",
+    "B110",
+    "B201",
+    "B202",
+    "B203",
+    "B204",
+    "B205",
+    "B206",
+    "B207",
+    "B208",
+    "B209",
+    "B210",
+    "B301",
+    "B302",
+    "B303",
+    "B304",
+    "B305",
+    "B306",
+    "B307",
+    "B308",
+    "B309",
+    "B310",
+  ];
 
-    if (!/^\d+$/.test(id)) {
-      setError("Student ID must contain only numbers");
-      setAlertType("error");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 1800);
-      return false;
-    }
-
-    if (!password) {
-      setError("Please enter your password");
-      setAlertType("error");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 1800);
-      return false;
-    }
+  function handleSelectRoom(room: string) {
+    setSelectedRoom(room);
+    setOpen(false);
+  }
 
     if (id.length !== 30) {
       setError("Invalid Student ID");
@@ -50,7 +75,6 @@ export default function LoginPage() {
       setTimeout(() => setShowAlert(false), 1800);
       return false;
     }
-
     setError("");
     return true;
   };
@@ -96,11 +120,26 @@ export default function LoginPage() {
     setAlertType("error");
     setShowAlert(true);
 
-    setTimeout(() => setShowAlert(false), 2500);
-  } finally {
-    setLoading(false);
+  async function handleGuestContinue() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/guest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ room: selectedRoom }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data?.message ?? "Failed to continue as guest.");
+        return;
+      }
+      router.push(`/attendance/${selectedRoom}`);
+    } catch {
+      setError("Cannot connect to server. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
-};
 
 useEffect(() => {
   const checkLogin = async () => {
@@ -126,125 +165,154 @@ useEffect(() => {
 
 if (checking) return null;
   return (
-    <div className="min-h-screen w-full grid">
-      <div className="min-h-screen flex flex-col items-center justify-center -mt-10 bg-linear-to-t from-white from-67% to-kmitl font-sans">
-        <Image
-          width={320}
-          height={150}
-          src="/KMITL.png"
-          alt="logo"
-          className="h-26 mb-4 drop-shadow-md lg:h-40 md:h-36 w-auto"
-          priority
-        />
-
-        <div className="max-w-sm w-2/3">
-          <div className="flex justify-center items-center mb-4">
-            <h1 className=" font-bold text-gray-700 text-sm">SIGN IN</h1>
-            <Image width={20} height={20} src="/ceolgo.png" alt="ce logo" className="w-auto ml-2" style={{ height: 'auto' }}/>
+    <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-t from-white from-67% to-kmitl font-sans">
+      <div className="w-full max-w-[380px] space-y-8 flex flex-col items-center">
+        <div className="flex flex-col items-center p-8 md:p-0">
+          {/* Logo Section */}
+          <div className="flex flex-col items-center gap-4 p-8 md:p-0">
+            <Image
+              width={240}
+              height={100}
+              src="/KMITL.png"
+              alt="logo"
+              className="h-auto w-auto object-contain"
+              priority
+            />
+            <div className="h-1.5 w-12 bg-orange-500 rounded-full" />
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-gray-700 text-xs font-bold mb-2 ml-1">
-                STUDENT ID
+          <div className="w-full space-y-6">
+            {/* STEP 1: ค้นหาห้อง */}
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                Step 1: Select Location
               </label>
-
-              <div className="relative">
-                <Image
-                  width={20}
-                  height={20}
-                  src="/id.png"
-                  alt="id icon"
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 opacity-50"
-                />
-                <input
-                  type="text"
-                  value={id}
-                  onChange={(e) => setStudentId(e.target.value)}
-                  className="pl-12 shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]  bg-gray-50 border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 outline-none rounded-full py-3 px-4 w-full text-gray-700 placeholder-gray-400 text-xs transition-all"
-                  placeholder="e.g. 6X200XXX"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 text-xs font-bold mb-2 ml-1">
-                PASSWORD
-              </label>
-
-              <div className="relative">
-                <Image
-                  width={20}
-                  height={20}
-                  src="/lock.png"
-                  alt="lock icon"
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 opacity-50"
-                />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-12 pr-12 shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] bg-gray-50 border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-200 outline-none rounded-full py-3 px-4 w-full text-gray-700 placeholder-gray-400 text-xs transition-all"
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 focus:outline-none"
-                >
-                  <Image
-                    width={20}
-                    height={20}
-                    src={showPassword ? "/eye.png" : "/eye-closed (1).png"}
-                    alt="toggle password"
-                    className="h-5 w-5 opacity-50 hover:opacity-100 transition-opacity"
-                  />
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-12">
-              <button
-                onClick={() => handleLogin()}
-                className="w-full flex justify-center items-center bg-kmitl hover:opacity-80 text-white font-bold py-3 rounded-2xl shadow-lg transition-all transform hover:scale-105"
+              <Button
+                onClick={() => setOpen(true)}
+                variant="outline"
+                className={`w-full h-14 justify-between border-2 rounded-xl transition-all shadow-sm font-semibold text-base
+                  ${
+                    selectedRoom
+                      ? "border-kmitl bg-green-50/30 text-orange-600"
+                      : "border-slate-200 text-slate-600 hover:border-orange-300"
+                  }`}
               >
-                SIGN IN
-                <Image width={20} height={20} src="/move-right.png" alt="" className="ml-2" />
-              </button>
+                <div className="flex items-center gap-2">
+                  <MapPin
+                    size={18}
+                    className={
+                      selectedRoom ? "text-kmitl" : "text-slate-400"
+                    }
+                  />
+                  {selectedRoom ? `Room ${selectedRoom}` : "Find your room..."}
+                </div>
+                <ChevronRight size={18} className="text-slate-300" />
+              </Button>
             </div>
-            
-            <a className="text-xs text-gray-500">
-              © 2026 KMITL Room Check in System. Designed & developed by CE03.
-            </a>
-          </div>
-        </div>
 
-        {/* Floating Alert Toast */}
-        {showAlert && (
-          <div
-            className={`fixed top-6 lg:left-19/39 left-19/42 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300 ${
-              alertType === "success"
-                ? "bg-green-600 border-l-4 border-green-700"
-                : "bg-red-500 border-l-4 border-red-700"
-            } text-white px-6 py-4 rounded-lg shadow-xl max-w-md w-70 mx-4`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-xs">{alertMessage}</span>
-              {alertType !== "success" && (
-                <button
-                  onClick={() => setShowAlert(false)}
-                  className="ml-4 text-white hover:text-gray-200 transition"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-            {alertType === "success" && (
-              <div className="mt-2 text-sm opacity-90">Redirecting...</div>
+            {/* STEP 2: แสดงเมื่อเลือกห้องแล้ว */}
+            {selectedRoom && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                {/* Select Role */}
+                <div className="space-y-2">
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                    Step 2: Login as
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={role}
+                      onChange={(e) => {
+                        setRole(e.target.value);
+                        setError("");
+                      }}
+                      className="w-full h-12 bg-white border border-slate-200 rounded-xl px-4 py-2 appearance-none focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-slate-700 cursor-pointer font-medium shadow-sm"
+                    >
+                      <option value="Personnel">Personnel</option>
+                      <option value="Guest">Guest</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Login Form Section */}
+                <div className="pt-2 border-t border-slate-100 mt-4">
+                  {role === "Personnel" ? (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300 pt-4">
+                      <Input
+                        type="text"
+                        placeholder="Username / Student ID"
+                        value={username}
+                        onChange={(e) => {
+                          setUsername(e.target.value);
+                          setError("");
+                        }}
+                        className="h-12 border-slate-200 rounded-xl focus-visible:ring-orange-500 shadow-sm"
+                      />
+                      <Input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          setError("");
+                        }}
+                        onKeyDown={(e) => e.key === "Enter" && handleSignIn()}
+                        className="h-12 border-slate-200 rounded-xl focus-visible:ring-orange-500 shadow-sm"
+                      />
+                      {error && (
+                        <p className="text-xs text-red-500 font-medium pl-1">
+                          {error}
+                        </p>
+                      )}
+                      <Button
+                        onClick={handleSignIn}
+                        disabled={loading}
+                        className="w-full h-12 bg-[#f15a22] hover:bg-[#d44d1d] text-white font-bold rounded-xl shadow-lg shadow-orange-200 transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {loading ? "Signing in..." : "Sign In"}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="animate-in fade-in slide-in-from-top-2 duration-300 pt-4 text-center">
+                      <Button
+                        onClick={handleGuestContinue}
+                        disabled={loading}
+                        variant="outline"
+                        className="w-full h-12 border-2 border-[#f15a22] bg-[#f15a22] text-white font-bold rounded-xl hover:bg-[#d44d1d] shadow-orange-200 transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {loading ? "Please wait..." : "Continue as Guest"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </div>
-        )}
+        </div>
       </div>
+
+      {/* Dialog ค้นหาห้อง */}
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <Command className="rounded-xl border shadow-md">
+          <CommandInput placeholder="Search room number (e.g. B201)..." />
+          <CommandList className="max-h-[300px]">
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup heading="Available Rooms">
+              {roomData.map((room) => (
+                <CommandItem
+                  key={room}
+                  onSelect={() => handleSelectRoom(room)}
+                  className="cursor-pointer py-3 hover:bg-slate-50 transition-colors"
+                >
+                  <MapPin className="mr-2 h-4 w-4 text-slate-400" />
+                  <span className="font-medium text-slate-700">
+                    Room {room}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </CommandDialog>
     </div>
   );
 }
