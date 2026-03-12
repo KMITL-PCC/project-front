@@ -10,6 +10,7 @@ import {
   FileSpreadsheet,
   Presentation,
   Clock,
+  LogOut
 } from "lucide-react";
 import {
   LineChart,
@@ -105,7 +106,7 @@ function Dashboard() {
   return (
     <div className="font-sans">
       {/* HEADER */}
-      <div className="h-16 md:h-20 w-full flex justify-between items-center px-3 md:px-4 shadow-md bg-white transition-all duration-300">
+      <div className="h-16 md:h-20 w-full flex justify-between items-center px-3 md:px-4 shadow-md bg-white transition-all duration-300 sticky top-0 z-50">
         <div className="flex items-center gap-2 md:gap-4">
           <img
             src="KMITL.png"
@@ -128,11 +129,15 @@ function Dashboard() {
             <div className="text-sm md:text-base font-bold">Lord Gaydow</div>
             <div className="text-xs md:text-sm text-gray-600">Professor</div>
           </div>
-          <img
+          {/* <img
             src="user.jpg"
             alt="User Profile"
             className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 object-cover rounded-full border transition-all"
-          />
+          /> */}
+          <button className="flex items-center gap-1 px-2 py-1 md:px-3 md:py-2 border-1 border-[#FE6136] hover:bg-[#F5F5F5] text-[#FE6136] cursor-pointer rounded-lg transition-all ml-2 md:ml-4 text-sm md:text-base">
+            <LogOut color="#FE6136" className="w-5 h-5 md:w-6 md:h-6 transition-colors" />
+            <span>Log out</span>
+          </button>
         </div>
       </div>
 
@@ -147,10 +152,10 @@ function Dashboard() {
                 <span>
                   {selectedDate
                     ? selectedDate.toLocaleDateString("en-GB", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })
                     : "Select date"}
                 </span>
                 <ChevronDown className="w-5 h-5" />
@@ -323,7 +328,7 @@ function Dashboard() {
 
       {/* Search & Filter Bar */}
       <div className="flex items-center gap-3 mb-8 h-12">
-        <div className="relative flex-1">
+        <div className="relative flex-1 ml-2">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           <input
             type="text"
@@ -350,15 +355,15 @@ function Dashboard() {
 
       {/*history list name */}
       {/* check user role (professor, student) */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b">
+      <div className="bg-white rounded-xl text-lg overflow-hidden">
+        <div className="pl-4">
           <h3 className="text-[#FE6136] font-bold">Total Student</h3>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="text-[#FE6136] text-sm md:text-base border-b">
+              <tr className="text-[#FE6136] text-sm md:text-base border-b border-grey-200">
                 <th className="hidden sm:block p-4 font-semibold">Name</th>
                 <th className="p-4 font-semibold text-center">Student Id</th>
                 <th className="p-4 font-semibold text-center">Room code</th>
@@ -370,7 +375,7 @@ function Dashboard() {
               {filteredStudents.map((row, index) => (
                 <tr
                   key={index}
-                  className={`border-b last:border-0 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-[#E8EEFB]/30"}`}
+                  className={`last:border-0 hover:bg-gray-50 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-[#E8EEFB]/30"}`}
                 >
                   <td className="hidden sm:block p-4 font-medium text-sm md:text-base">
                     {row.name}
@@ -381,10 +386,10 @@ function Dashboard() {
                   <td className="p-4 text-center text-gray-600 text-sm">
                     {row.room}
                   </td>
-                  <td className="p-4 text-center font-semibold text-sm">
+                  <td className="p-4 text-center font-gray-600 text-sm">
                     {row.checkIn}
                   </td>
-                  <td className="p-4 text-center font-semibold text-sm">
+                  <td className="p-4 text-center font-gray-600 text-sm">
                     {row.checkOut}
                   </td>
                 </tr>
