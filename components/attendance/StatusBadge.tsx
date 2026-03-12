@@ -1,4 +1,4 @@
-type Status = "pending" | "checked_in" | "checked_out" | "error";
+type Status = "pending" | "checked_in" | "checked_out" | "error" | "swapped";
 
 type StatusBadgeProps = {
   label: string;
@@ -11,6 +11,7 @@ const statusColorMap: Record<Status, string> = {
   checked_in: "text-green-600",
   checked_out: "text-gray-500",
   error: "text-red-500",
+  swapped: "text-blue-500",
 };
 
 export function StatusBadge({ label, value, status }: StatusBadgeProps) {
