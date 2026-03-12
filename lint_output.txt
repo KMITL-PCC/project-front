@@ -1,0 +1,70 @@
+
+> project-front@0.1.0 lint
+> eslint
+
+
+/home/nathakon/project/merge/project-front/app/(auth)/teacher-login/page.tsx
+  13:10  warning  'error' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  14:10  warning  'success' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  14:19  warning  'setSuccess' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  15:10  warning  'loading' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  15:19  warning  'setLoading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/nathakon/project/merge/project-front/app/history/page.tsx
+  2:18  warning  'LayoutDashboard' is defined but never used  @typescript-eslint/no-unused-vars
+  2:46  warning  'LogIn' is defined but never used            @typescript-eslint/no-unused-vars
+
+/home/nathakon/project/merge/project-front/app/login/page.tsx
+  14:10  warning  'error' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  15:10  warning  'success' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  15:19  warning  'setSuccess' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  16:10  warning  'loading' is assigned a value but never used     @typescript-eslint/no-unused-vars
+
+/home/nathakon/project/merge/project-front/app/page.tsx
+   3:10  warning  'redirect' is defined but never used                                                                       @typescript-eslint/no-unused-vars
+  10:37  warning  React Hook useEffect has a missing dependency: 'router'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/home/nathakon/project/merge/project-front/app/scan/2/page.tsx
+    9:5   warning  'User' is defined but never used                                                                                         @typescript-eslint/no-unused-vars
+   10:5   warning  'ShieldCheck' is defined but never used                                                                                  @typescript-eslint/no-unused-vars
+   15:5   warning  'ChevronRight' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+   20:5   warning  'Lock' is defined but never used                                                                                         @typescript-eslint/no-unused-vars
+   51:14  warning  'e' is defined but never used                                                                                            @typescript-eslint/no-unused-vars
+  122:8   warning  React Hook useEffect has a missing dependency: 'performScanDiscovery'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  151:18  warning  'err' is defined but never used                                                                                          @typescript-eslint/no-unused-vars
+  151:23  error    Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  198:27  error    Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  212:22  warning  'err' is defined but never used                                                                                          @typescript-eslint/no-unused-vars
+  222:18  warning  'e' is defined but never used                                                                                            @typescript-eslint/no-unused-vars
+  256:23  error    Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+  286:19  warning  'data' is assigned a value but never used                                                                                @typescript-eslint/no-unused-vars
+  296:23  error    Unexpected any. Specify a different type                                                                                 @typescript-eslint/no-explicit-any
+
+/home/nathakon/project/merge/project-front/components/attendance/AttenDanceClient.tsx
+  23:10  warning  'loading' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  24:10  warning  'error' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  73:9   warning  'checkIn' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  89:9   warning  'checkOut' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/nathakon/project/merge/project-front/components/ui/combobox.tsx
+  277:3  warning  'children' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/nathakon/project/merge/project-front/components/ui/sidebar.tsx
+  611:26  error  Error: Cannot call impure function during render
+
+`Math.random` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+/home/nathakon/project/merge/project-front/components/ui/sidebar.tsx:611:26
+  609 |   // Random width between 50 to 90%.
+  610 |   const width = React.useMemo(() => {
+> 611 |     return `${Math.floor(Math.random() * 40) + 50}%`
+      |                          ^^^^^^^^^^^^^ Cannot call impure function
+  612 |   }, [])
+  613 |
+  614 |   return (  react-hooks/purity
+
+/home/nathakon/project/merge/project-front/next.config.ts
+  1:7  warning  'nextConfig' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 34 problems (5 errors, 29 warnings)
+

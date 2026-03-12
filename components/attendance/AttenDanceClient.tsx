@@ -13,7 +13,7 @@ type Props = {
   room: string;
 };
 
-type Status = "pending" | "checked_in" | "checked_out" | "error";
+type Status = "pending" | "checked_in" | "checked_out" | "error" | "swapped";
 
 export function AttenDance({ room }: Props) {
   const [status, setStatus] = useState<Status>("pending");
@@ -24,7 +24,74 @@ export function AttenDance({ room }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"checkin" | "checkout">("checkin");
-  const [isAddFriendOpen, setIsAddFriendOpen] = useState(false);
+  const [user, setUser] = useState<{ studentId: string; fname: string; lname: string } | null>(null);
+  const [swappedFrom, setSwappedFrom] = useState<{ code: string; desc: string } | null>(null);
+
+  useEffect(() => {
+    const fetchUserAndStatus = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const response = await fetch(`${apiUrl}/api/auth/me`, {
+          credentials: "include",
+        });
+        
+        let currentStudentId = null;
+        let identifiedUser = null;
+
+        if (response.ok) {
+          const data = await response.json();
+          const userData = data.user;
+          if (userData) {
+            identifiedUser = {
+              studentId: userData.studentId || userData.StudentId,
+              fname: userData.fname,
+              lname: userData.lname
+            };
+            currentStudentId = identifiedUser.studentId;
+            setUser(identifiedUser);
+          }
+        } else {
+          const localUser = localStorage.getItem("user");
+          if (localUser) {
+            identifiedUser = JSON.parse(localUser);
+            if (identifiedUser) {
+              identifiedUser = {
+                studentId: identifiedUser.studentId || identifiedUser.StudentId,
+                fname: identifiedUser.fname,
+                lname: identifiedUser.lname
+              };
+              currentStudentId = identifiedUser.studentId;
+              setUser(identifiedUser);
+            }
+          }
+        }
+
+        if (currentStudentId) {
+          // Fetch check-in status
+          const statusRes = await fetch(`${apiUrl}/api/qrcode/status/${room}`, {
+            credentials: "include",
+          });
+          if (statusRes.ok) {
+            const statusData = await statusRes.json();
+            if (statusData.action === "CHECK_OUT") {
+              setStatus("checked_in");
+            } else if (statusData.action === "SWAP") {
+              setStatus("swapped");
+              setSwappedFrom({
+                code: statusData.currentRoom,
+                desc: statusData.currentRoomDesc
+              });
+            } else {
+              setStatus("pending");
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch user or status:", err);
+      }
+    };
+    fetchUserAndStatus();
+  }, [room]);
 
   const checkIn = async () => {
     const res = await fetch("/api/check-in", {
@@ -59,20 +126,22 @@ export function AttenDance({ room }: Props) {
   };
 
   const buttonLabel =
-    // status === "error"
-    //   ? "RETRY"
     status === "pending"
       ? "CHECK-IN →"
       : status === "checked_in"
         ? "CHECK-OUT →"
-        : "DONE";
+        : status === "swapped"
+          ? "SWAP →"
+          : "DONE";
 
   const title =
     status === "checked_in"
       ? "Check-out"
       : status === "checked_out"
         ? "Completed"
-        : "Check-in";
+        : status === "swapped"
+          ? "Swap Room"
+          : "Check-in";
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -89,18 +158,35 @@ export function AttenDance({ room }: Props) {
   }, []);
 
   const handleAction = async () => {
+    if (!user) return;
+    
     try {
       setLoading(true);
       setError(null);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-      if (status === "pending") {
-        // await checkIn();
+      let action = "CHECK_IN";
+      if (status === "checked_in") action = "CHECK_OUT";
+      if (status === "swapped") action = "SWAP";
+
+      const res = await fetch(`${apiUrl}/api/qrcode/action/direct`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action,
+          roomCode: room,
+          studentId: user.studentId
+        }),
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Action failed");
+
+      if (status === "pending" || status === "swapped") {
         setStatus("checked_in");
         setModalType("checkin");
         setIsModalOpen(true);
-        setIsAddFriendOpen(true);
       } else if (status === "checked_in") {
-        // await checkOut();
         setStatus("checked_out");
         setModalType("checkout");
         setIsModalOpen(true);
@@ -123,8 +209,8 @@ export function AttenDance({ room }: Props) {
           <RoomHeader room={room} />
 
           <StudentProfile
-            name="Mr. Shadow Milk"
-            studentId="66200888"
+            name={user ? `${user.fname} ${user.lname}` : "Loading..."}
+            studentId={user ? user.studentId : "..."}
             avatarUrl="/avatar.png"
           />
 
@@ -132,6 +218,13 @@ export function AttenDance({ room }: Props) {
             <StatusBadge label="STATUS" value={status} status={status} />
             <StatusBadge label="TIME" value={time} />
           </div>
+
+          {status === "swapped" && swappedFrom && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-xl text-blue-700 text-sm">
+              คุณกำลังเช็คอินอยู่ที่ห้อง <strong>{swappedFrom.code}</strong> ({swappedFrom.desc}) 
+              <br />คลิกปุ่มด้านล่างเพื่อทำการ Swap ย้ายมาห้องนี้แทน
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -166,7 +259,7 @@ export function AttenDance({ room }: Props) {
         type={modalType}
         room={room}
         time={time}
-        studentName="Mr. Shadow Milk"
+        studentName={user ? `${user.fname} ${user.lname}` : "Student"}
       />
 
     </section>
