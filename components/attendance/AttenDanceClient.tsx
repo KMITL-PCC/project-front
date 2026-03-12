@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "../ui/card";
 import { StatusBadge } from "./StatusBadge";
 import { StudentProfile } from "./StudentProfile";
 import { RoomHeader } from "./RoomHeader";
 import { PrivacyModal } from "./PrivacyModal";
 import { CheckStatusModal } from "../checkin/checkinnn";
-
 
 type Props = {
   room: string;
@@ -16,6 +16,7 @@ type Props = {
 type Status = "pending" | "checked_in" | "checked_out" | "error" | "swapped";
 
 export function AttenDance({ room }: Props) {
+  const router = useRouter();
   const [status, setStatus] = useState<Status>("pending");
   const [time, setTime] = useState("");
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
@@ -24,17 +25,23 @@ export function AttenDance({ room }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"checkin" | "checkout">("checkin");
-  const [user, setUser] = useState<{ studentId: string; fname: string; lname: string } | null>(null);
-  const [swappedFrom, setSwappedFrom] = useState<{ code: string; desc: string } | null>(null);
+  const [user, setUser] = useState<{
+    studentId: string;
+    fname: string;
+    lname: string;
+  } | null>(null);
+  const [swappedFrom, setSwappedFrom] = useState<{
+    code: string;
+    desc: string;
+  } | null>(null);
 
   useEffect(() => {
     const fetchUserAndStatus = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-        const response = await fetch(`${apiUrl}/api/auth/me`, {
+        const response = await fetch("/api/auth/me", {
           credentials: "include",
         });
-        
+
         let currentStudentId = null;
         let identifiedUser = null;
 
@@ -45,7 +52,7 @@ export function AttenDance({ room }: Props) {
             identifiedUser = {
               studentId: userData.studentId || userData.StudentId,
               fname: userData.fname,
-              lname: userData.lname
+              lname: userData.lname,
             };
             currentStudentId = identifiedUser.studentId;
             setUser(identifiedUser);
@@ -58,7 +65,7 @@ export function AttenDance({ room }: Props) {
               identifiedUser = {
                 studentId: identifiedUser.studentId || identifiedUser.StudentId,
                 fname: identifiedUser.fname,
-                lname: identifiedUser.lname
+                lname: identifiedUser.lname,
               };
               currentStudentId = identifiedUser.studentId;
               setUser(identifiedUser);
@@ -68,7 +75,7 @@ export function AttenDance({ room }: Props) {
 
         if (currentStudentId) {
           // Fetch check-in status
-          const statusRes = await fetch(`${apiUrl}/api/qrcode/status/${room}`, {
+          const statusRes = await fetch(`/api/qrcode/status/${room}`, {
             credentials: "include",
           });
           if (statusRes.ok) {
@@ -79,7 +86,7 @@ export function AttenDance({ room }: Props) {
               setStatus("swapped");
               setSwappedFrom({
                 code: statusData.currentRoom,
-                desc: statusData.currentRoomDesc
+                desc: statusData.currentRoomDesc,
               });
             } else {
               setStatus("pending");
@@ -159,23 +166,22 @@ export function AttenDance({ room }: Props) {
 
   const handleAction = async () => {
     if (!user) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
       let action = "CHECK_IN";
       if (status === "checked_in") action = "CHECK_OUT";
       if (status === "swapped") action = "SWAP";
 
-      const res = await fetch(`${apiUrl}/api/qrcode/action/direct`, {
+      const res = await fetch("/api/qrcode/action/direct", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action,
           roomCode: room,
-          studentId: user.studentId
+          studentId: user.studentId,
         }),
         credentials: "include",
       });
@@ -221,8 +227,10 @@ export function AttenDance({ room }: Props) {
 
           {status === "swapped" && swappedFrom && (
             <div className="mt-4 p-3 bg-blue-50 rounded-xl text-blue-700 text-sm">
-              คุณกำลังเช็คอินอยู่ที่ห้อง <strong>{swappedFrom.code}</strong> ({swappedFrom.desc}) 
-              <br />คลิกปุ่มด้านล่างเพื่อทำการ Swap ย้ายมาห้องนี้แทน
+              คุณกำลังเช็คอินอยู่ที่ห้อง <strong>{swappedFrom.code}</strong> (
+              {swappedFrom.desc})
+              <br />
+              คลิกปุ่มด้านล่างเพื่อทำการ Swap ย้ายมาห้องนี้แทน
             </div>
           )}
         </CardContent>
@@ -253,6 +261,18 @@ export function AttenDance({ room }: Props) {
         {buttonLabel}
       </button>
 
+      <button
+        onClick={() => router.push("/history")}
+        className="
+          w-full rounded-xl py-3 font-semibold
+          border-2 border-kmitl text-kmitl
+          hover:bg-orange-50 active:bg-orange-100
+          transition text-sm sm:text-base
+        "
+      >
+        History
+      </button>
+
       <CheckStatusModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -261,7 +281,6 @@ export function AttenDance({ room }: Props) {
         time={time}
         studentName={user ? `${user.fname} ${user.lname}` : "Student"}
       />
-
     </section>
   );
 }
