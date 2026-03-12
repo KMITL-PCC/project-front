@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Image from "next/image";
+
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,6 +16,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   const validate = () => {
     if (!id) {
@@ -40,7 +43,7 @@ export default function LoginPage() {
       return false;
     }
 
-    if (id.length !== 8) {
+    if (id.length !== 30) {
       setError("Invalid Student ID");
       setAlertType("error");
       setShowAlert(true);
@@ -58,8 +61,7 @@ export default function LoginPage() {
   setLoading(true);
 
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-    const response = await fetch(`${apiUrl}/api/auth/login`, {
+    const response = await fetch("http://localhost:3000/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -84,7 +86,7 @@ export default function LoginPage() {
     setShowAlert(true);
 
     setTimeout(() => {
-      router.push("/attendance/test");
+      router.push(`/attendance/${data.room}`);
     }, 1200);
 
   } catch (err) {
@@ -100,6 +102,29 @@ export default function LoginPage() {
   }
 };
 
+useEffect(() => {
+  const checkLogin = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/auth/me", {
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem("user", JSON.stringify(data.user));
+        router.push(`/attendance/${data.roomCode}`);
+      }
+    } catch (err) {
+      console.log("No session");
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  checkLogin();
+}, [router]);
+
+if (checking) return null;
   return (
     <div className="min-h-screen w-full grid">
       <div className="min-h-screen flex flex-col items-center justify-center -mt-10 bg-linear-to-t from-white from-67% to-kmitl font-sans">
