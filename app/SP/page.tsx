@@ -1,22 +1,30 @@
-import React from 'react';
+"use client";
+
+import React, { useState } from 'react';
 import { QrCode, Sparkles, X } from 'lucide-react';
 
-interface CheckoutSuccessProps {
-  isOpen: boolean;
-  onClose: () => void;
-  room: string;
-  checkInTime: string;
-  checkOutTime: string;
-}
+export default function SPPage() {
+  const [isOpen, setIsOpen] = useState(true);
 
-const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({ 
-  isOpen, 
-  onClose, 
-  room, 
-  checkInTime, 
-  checkOutTime 
-}) => {
-  if (!isOpen) return null;
+  // Mock data for previewing the UI
+  const room = "Room 101";
+  const checkInTime = "14:00";
+  const checkOutTime = "12:00";
+  const onClose = () => setIsOpen(false);
+
+  if (!isOpen) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+        <p className="mb-4 text-gray-600">The modal is closed.</p>
+        <button 
+          onClick={() => setIsOpen(true)}
+          className="px-6 py-2 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition font-medium"
+        >
+          Show Checkout Success Modal
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6">
@@ -103,6 +111,4 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = ({
       </div>
     </div>
   );
-};
-
-export default CheckoutSuccess;
+}
