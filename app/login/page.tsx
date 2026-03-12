@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Image from "next/image";
+
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,6 +16,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   const validate = () => {
     if (!id) {
@@ -40,7 +43,7 @@ export default function LoginPage() {
       return false;
     }
 
-    if (id.length !== 8) {
+    if (id.length !== 30) {
       setError("Invalid Student ID");
       setAlertType("error");
       setShowAlert(true);
@@ -84,7 +87,7 @@ export default function LoginPage() {
     setShowAlert(true);
 
     setTimeout(() => {
-      router.push("/attendance/test");
+      router.push(`/attendance/${data.roomCode}`);
     }, 1200);
 
   } catch (err) {
