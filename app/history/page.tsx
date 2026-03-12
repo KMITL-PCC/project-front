@@ -29,10 +29,18 @@ const AttendancePage = () => {
   const [allHistory, setAllHistory] = useState<HistoryItem[]>([]);
   const [studentName, setStudentName] = useState("");
   const [studentId, setStudentId] = useState("");
+  const [studentMajor, setStudentMajor] = useState("");
+  const [role, setRole] = useState("");
 
   const [selectedDate, setSelectedDate] = useState("");
   const [showAll, setShowAll] = useState(false);
   const dateInputRef = useRef<HTMLInputElement>(null);
+
+  const formatDateDisplay = (dateStr: string) => {
+    if (!dateStr) return "Select Date";
+    const [year, month, day] = dateStr.split("-");
+    return `${day}-${month}-${year}`;
+  };
 
   useEffect(() => {
     const loadHistory = async () => {
@@ -80,17 +88,23 @@ const AttendancePage = () => {
       <div className="min-h-screen bg-gray-50 font-sans text-slate-700">
         {/* Navbar */}
         <nav className="bg-white border-b px-6 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2 font-bold text-blue-900 text-xl">
-            <div className="bg-blue-800 p-1.5 rounded">
-              <Building2 className="text-white w-6 h-6" />
-            </div>
-            EDUPORTAL
+          <div className="flex items-start gap-3">
+            <img
+              src="/KMITL.png"
+              alt="KMITL Logo"
+              className="w-auto h-15 md:w-40  sm:hidden block object-contain"
+            />
+            <img
+              src="/Horizontal_KMITL_Logo.png"
+              alt="KMITL Logo"
+              className="w-auto h-20 hidden sm:block object-contain"
+            />
           </div>
 
           <div className="flex items-center gap-4">
             <div className="text-right text-xs">
               <p className="font-bold hidden sm:block">{studentId || "-"}</p>
-              <p className="text-gray-400 hidden sm:block">Student</p>
+              <p className="text-gray-400 hidden sm:block">{role || "-"}</p>
             </div>
 
             <button className="flex items-center justify-center gap-2 border rounded-md px-3 py-1.5 text-sm hover:bg-gray-200 transition cursor-pointer">
@@ -105,17 +119,28 @@ const AttendancePage = () => {
           <section className="bg-white rounded-xl shadow-sm border p-8 flex flex-col items-center sm:items-start relative overflow-hidden">
             <div className="flex items-baseline gap-3 mb-2">
               <h1 className="text-3xl font-bold text-slate-800">
-                {studentName || "Student Name"}
+                {studentName || "User Name"}
               </h1>
             </div>
 
             <div className="space-y-1 text-gray-500 text-sm">
-              <p className="flex items-center gap-2 uppercase tracking-tight">
-                🏢 ID: {studentId || "-"}
-              </p>
-              <p className="flex items-center gap-2">
-                👤 Computer Science & Engineering
-              </p>
+              <div className="flex items-center gap-2">
+                <img src="/id.png" alt="ID Icon" className="w-5 h-5" />
+                <p className="flex items-center gap-2 uppercase tracking-tight">
+                  ID: {studentId || "-"}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <img
+                  src="/major.png"
+                  alt="Major Icon"
+                  className="w-5 h-5 opacity-40"
+                />
+                <p className="flex items-center gap-2">
+                  Major: {studentMajor || "-"}
+                </p>
+              </div>
             </div>
           </section>
 
@@ -129,7 +154,14 @@ const AttendancePage = () => {
               onClick={() => setShowCalendar(true)}
               className="text-gray-400 text-xs flex items-center gap-2 uppercase cursor-pointer"
             >
-              📅 {selectedDate ? selectedDate : "Select Date"}
+              <img
+                src="/calendar.png"
+                alt="Calendar Icon"
+                className="w-4 h-4 opacity-45"
+              />
+
+              {selectedDate ? formatDateDisplay(selectedDate) : "Select Date"}
+
               <input
                 type="date"
                 ref={dateInputRef}
@@ -183,7 +215,7 @@ const AttendancePage = () => {
             {!showAll && (
               <button
                 onClick={() => setShowAll(true)}
-                className="text-blue-600 font-bold text-sm hover:underline"
+                className="text-orange-400 font-bold text-sm hover:underline"
               >
                 View All Historical Records
               </button>
@@ -192,7 +224,7 @@ const AttendancePage = () => {
         </main>
 
         <footer className="text-center py-8 text-gray-400 text-xs">
-          © 2024 EduPortal Integrated Systems. All rights reserved.
+          KMITL, PCC | Computer Engineering &copy; 2026
         </footer>
       </div>
 
@@ -214,6 +246,7 @@ const AttendancePage = () => {
                 setShowCalendar(false);
               }}
               inline
+              dateFormat="dd/MM/yyyy"
             />
             {/* Added a close button for better UX */}
             <button
