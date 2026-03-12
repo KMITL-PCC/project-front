@@ -386,10 +386,10 @@ function Dashboard() {
                   <td className="p-4 text-center text-gray-600 text-sm">
                     {row.room}
                   </td>
-                  <td className="p-4 text-center font-gray-600 text-sm">
+                  <td className="p-4 text-center text-gray-600 text-sm">
                     {row.checkIn}
                   </td>
-                  <td className="p-4 text-center font-gray-600 text-sm">
+                  <td className="p-4 text-center text-gray-600 text-sm">
                     {row.checkOut}
                   </td>
                 </tr>
