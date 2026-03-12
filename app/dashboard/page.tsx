@@ -1,5 +1,5 @@
 "use client";
-
+import api from "../api/axios";
 import React, { useState, useEffect, useRef } from "react";
 import "./styles/calendar.css";
 import DatePicker from "react-datepicker";
@@ -10,7 +10,7 @@ import {
   FileSpreadsheet,
   Presentation,
   Clock,
-  LogOut
+  LogOut,
 } from "lucide-react";
 import {
   LineChart,
@@ -76,6 +76,11 @@ const data_out = [
   { time: "14:00", students: 0 },
 ];
 
+const checkHealth = async () => {
+  const res = await api.get('/dashboard');
+  console.log(res.data);
+};
+
 const combinedData = data.map((item, index) => ({
   time: item.time,
   checkIn: item.students,
@@ -135,7 +140,10 @@ function Dashboard() {
             className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 object-cover rounded-full border transition-all"
           /> */}
           <button className="flex items-center gap-1 px-2 py-1 md:px-3 md:py-2 border-1 border-[#FE6136] hover:bg-[#F5F5F5] text-[#FE6136] cursor-pointer rounded-lg transition-all ml-2 md:ml-4 text-sm md:text-base">
-            <LogOut color="#FE6136" className="w-5 h-5 md:w-6 md:h-6 transition-colors" />
+            <LogOut
+              color="#FE6136"
+              className="w-5 h-5 md:w-6 md:h-6 transition-colors"
+            />
             <span>Log out</span>
           </button>
         </div>
@@ -152,10 +160,10 @@ function Dashboard() {
                 <span>
                   {selectedDate
                     ? selectedDate.toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
                     : "Select date"}
                 </span>
                 <ChevronDown className="w-5 h-5" />
