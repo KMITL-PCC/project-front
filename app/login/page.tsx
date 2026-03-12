@@ -1,7 +1,6 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+
+import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -17,9 +16,7 @@ import {
 } from "@/components/ui/command";
 import { MapPin, ChevronRight } from "lucide-react";
 
-
-export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
+export default function Login() {
   const router = useRouter();
   const [role, setRole] = useState("Personnel");
   const [open, setOpen] = useState(false);
@@ -28,7 +25,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
 
   const roomData = [
     "B101",
@@ -68,57 +64,36 @@ export default function LoginPage() {
     setOpen(false);
   }
 
-    if (id.length !== 30) {
-      setError("Invalid Student ID");
-      setAlertType("error");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 1800);
-      return false;
+  async function handleSignIn() {
+    if (!username.trim() || !password.trim()) {
+      setError("Please enter both username and password.");
+      return;
     }
     setError("");
-    return true;
-  };
-
-  const handleLogin = async () => {
-  if (!validate()) return;
-
-  setLoading(true);
-
-  try {
-    const response = await fetch("http://localhost:3000/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        studentId: id,
-        password: password,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Invalid credentials");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          "student Id": username,
+          password: password,
+          room: selectedRoom,
+        }),
+      });
+      
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data?.message ?? "Login failed. Please try again.");
+        return;
+      }
+      router.push(`/attendance/${selectedRoom}`);
+    } catch {
+      setError("Cannot connect to server. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    
-    localStorage.setItem("user", JSON.stringify(data.user));
-
-    setAlertMessage("Sign in successful!");
-    setAlertType("success");
-    setShowAlert(true);
-
-    setTimeout(() => {
-      router.push(`/attendance/${data.room}`);
-    }, 1200);
-
-  } catch (err) {
-    const e = err as Error;
-
-    setAlertMessage(e.message);
-    setAlertType("error");
-    setShowAlert(true);
+  }
 
   async function handleGuestContinue() {
     setLoading(true);
@@ -141,29 +116,6 @@ export default function LoginPage() {
     }
   }
 
-useEffect(() => {
-  const checkLogin = async () => {
-    try {
-      const res = await fetch("http://localhost:3000/api/auth/me", {
-        credentials: "include",
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        localStorage.setItem("user", JSON.stringify(data.user));
-        router.push(`/attendance/${data.roomCode}`);
-      }
-    } catch (err) {
-      console.log("No session");
-    } finally {
-      setChecking(false);
-    }
-  };
-
-  checkLogin();
-}, [router]);
-
-if (checking) return null;
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-t from-white from-67% to-kmitl font-sans">
       <div className="w-full max-w-[380px] space-y-8 flex flex-col items-center">
