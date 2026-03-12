@@ -11,7 +11,7 @@ import {
   FileSpreadsheet,
   Presentation,
   Clock,
-  LogOut
+  LogOut,
 } from "lucide-react";
 import {
   LineChart,
@@ -44,7 +44,11 @@ function Dashboard() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [currentUser, setCurrentUser] = useState<{ fname: string; lname: string; roleName: string } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{
+    fname: string;
+    lname: string;
+    roleName: string;
+  } | null>(null);
   const router = useRouter();
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
@@ -54,22 +58,23 @@ function Dashboard() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
         const response = await fetch(`${apiUrl}/api/auth/me`, {
           credentials: "include",
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           // ตรวจสอบว่ามีบทบาทเป็น admin หรือไม่
           const userRole = data.user?.role?.roleId || data.user?.roleId;
-          
+
           if (userRole === "admin") {
             setIsAdmin(true);
             setCurrentUser({
               fname: data.user?.fname || "Admin",
               lname: data.user?.lname || "",
-              roleName: data.user?.role?.name || "Administrator"
+              roleName: data.user?.role?.name || "Administrator",
             });
             setHasMounted(true);
             fetchRooms();
@@ -88,7 +93,7 @@ function Dashboard() {
         router.push("/login");
       }
     };
-    
+
     checkAuth();
   }, [router]);
 
@@ -116,7 +121,9 @@ function Dashboard() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const formattedDate = selectedDate ? selectedDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+      const formattedDate = selectedDate
+        ? selectedDate.toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0];
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
       const url = new URL(`${apiUrl}/api/dashboard/${selectedRoom}`);
       url.searchParams.append("date", formattedDate);
@@ -152,29 +159,43 @@ function Dashboard() {
     return new Date(isoString).toLocaleTimeString("th-TH", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false
+      hour12: false,
     });
   };
 
   // Statistics calculation
   const stats = {
     total: attendances.length,
-    checkedIn: attendances.filter(a => a.checkinTime && !a.checkoutTime).length + attendances.filter(a => a.checkoutTime).length,
-    checkedOut: attendances.filter(a => a.checkoutTime).length,
+    checkedIn:
+      attendances.filter((a) => a.checkinTime && !a.checkoutTime).length +
+      attendances.filter((a) => a.checkoutTime).length,
+    checkedOut: attendances.filter((a) => a.checkoutTime).length,
   };
 
   // Chart data calculation (hourly)
   const getHourlyData = () => {
-    const hours = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
-    return hours.map(hour => {
+    const hours = [
+      "08:00",
+      "09:00",
+      "10:00",
+      "11:00",
+      "12:00",
+      "13:00",
+      "14:00",
+      "15:00",
+      "16:00",
+      "17:00",
+      "18:00",
+    ];
+    return hours.map((hour) => {
       const h = parseInt(hour.split(":")[0]);
-      const checkInCount = attendances.filter(a => {
+      const checkInCount = attendances.filter((a) => {
         if (!a.checkinTime) return false;
         const d = new Date(a.checkinTime);
         return d.getHours() === h;
       }).length;
 
-      const checkOutCount = attendances.filter(a => {
+      const checkOutCount = attendances.filter((a) => {
         if (!a.checkoutTime) return false;
         const d = new Date(a.checkoutTime);
         return d.getHours() === h;
@@ -183,7 +204,7 @@ function Dashboard() {
       return {
         time: hour,
         checkIn: checkInCount,
-        checkOut: checkOutCount
+        checkOut: checkOutCount,
       };
     });
   };
@@ -206,25 +227,27 @@ function Dashboard() {
     }
   };
 
-  const exportToExcel = () => {
-    const dataToExport = attendances.map(a => ({
-      Id: a.studentId,
-      Name: a.user_name,
-      CheckIn: formatTime(a.checkinTime),
-      CheckOut: formatTime(a.checkoutTime)
-    }));
-    const ws = XLSX.utils.json_to_sheet(dataToExport);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Students");
-    XLSX.writeFile(wb, "students.xlsx");
-  };
+  // const exportToExcel = () => {
+  //   const dataToExport = attendances.map((a) => ({
+  //     Id: a.studentId,
+  //     Name: a.user_name,
+  //     CheckIn: formatTime(a.checkinTime),
+  //     CheckOut: formatTime(a.checkoutTime),
+  //   }));
+  //   const ws = XLSX.utils.json_to_sheet(dataToExport);
+  //   const wb = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(wb, ws, "Students");
+  //   XLSX.writeFile(wb, "students.xlsx");
+  // };
 
   if (isAdmin === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-[#FE6136] border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 font-medium font-sans">Checking authorization...</p>
+          <p className="text-gray-600 font-medium font-sans">
+            Checking authorization...
+          </p>
         </div>
       </div>
     );
@@ -257,19 +280,26 @@ function Dashboard() {
         </div>
         <div className="flex items-center">
           <div className="hidden sm:block text-right mr-3 md:mr-4">
-            <div className="text-sm md:text-base font-bold">{currentUser?.fname} {currentUser?.lname}</div>
-            <div className="text-xs md:text-sm text-gray-600">{currentUser?.roleName}</div>
+            <div className="text-sm md:text-base font-bold">
+              {currentUser?.fname} {currentUser?.lname}
+            </div>
+            <div className="text-xs md:text-sm text-gray-600">
+              {currentUser?.roleName}
+            </div>
           </div>
           {/* <img
             src="user.jpg"
             alt="User Profile"
             className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 object-cover rounded-full border transition-all"
           /> */}
-          <button 
+          <button
             onClick={handleLogout}
             className="flex items-center gap-1 px-2 py-1 md:px-3 md:py-2 border-1 border-[#FE6136] hover:bg-[#F5F5F5] text-[#FE6136] cursor-pointer rounded-lg transition-all ml-2 md:ml-4 text-sm md:text-base"
           >
-            <LogOut color="#FE6136" className="w-5 h-5 md:w-6 md:h-6 transition-colors" />
+            <LogOut
+              color="#FE6136"
+              className="w-5 h-5 md:w-6 md:h-6 transition-colors"
+            />
             <span>Log out</span>
           </button>
         </div>
@@ -286,10 +316,10 @@ function Dashboard() {
                 <span>
                   {selectedDate
                     ? selectedDate.toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })
                     : "Select date"}
                 </span>
                 <ChevronDown className="w-5 h-5" />
@@ -479,8 +509,10 @@ function Dashboard() {
             className="appearance-none w-full md:w-40 sm:w-10 h-12 bg-[#E8EEFB] px-4 pr-10 rounded-xl font-bold text-[#FE6136] focus:outline-none cursor-pointer border-2 border-transparent hover:border-orange-200 transition-all"
           >
             <option value="All">Room: All</option>
-            {availableRooms.map(room => (
-              <option key={room.roomCode} value={room.roomCode}>{room.roomCode}</option>
+            {availableRooms.map((room) => (
+              <option key={room.roomCode} value={room.roomCode}>
+                {room.roomCode}
+              </option>
             ))}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FE6136] pointer-events-none" />
@@ -508,15 +540,21 @@ function Dashboard() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="p-10 text-center text-gray-500">Loading data...</td>
+                  <td colSpan={5} className="p-10 text-center text-gray-500">
+                    Loading data...
+                  </td>
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan={5} className="p-10 text-center text-red-500">{error}</td>
+                  <td colSpan={5} className="p-10 text-center text-red-500">
+                    {error}
+                  </td>
                 </tr>
               ) : attendances.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-10 text-center text-gray-500">No attendance data found for this period.</td>
+                  <td colSpan={5} className="p-10 text-center text-gray-500">
+                    No attendance data found for this period.
+                  </td>
                 </tr>
               ) : (
                 attendances.map((row, index) => (
