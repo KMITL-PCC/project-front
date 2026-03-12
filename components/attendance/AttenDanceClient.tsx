@@ -38,9 +38,7 @@ export function AttenDance({ room }: Props) {
   useEffect(() => {
     const fetchUserAndStatus = async () => {
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-        const response = await fetch(`${apiUrl}/api/auth/me`, {
+        const response = await fetch("/api/auth/me", {
           credentials: "include",
         });
 
@@ -77,7 +75,7 @@ export function AttenDance({ room }: Props) {
 
         if (currentStudentId) {
           // Fetch check-in status
-          const statusRes = await fetch(`${apiUrl}/api/qrcode/status/${room}`, {
+          const statusRes = await fetch(`/api/qrcode/status/${room}`, {
             credentials: "include",
           });
           if (statusRes.ok) {
@@ -172,13 +170,12 @@ export function AttenDance({ room }: Props) {
     try {
       setLoading(true);
       setError(null);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
       let action = "CHECK_IN";
       if (status === "checked_in") action = "CHECK_OUT";
       if (status === "swapped") action = "SWAP";
 
-      const res = await fetch(`${apiUrl}/api/qrcode/action/direct`, {
+      const res = await fetch("/api/qrcode/action/direct", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
