@@ -53,16 +53,51 @@ export default function LoginPage() {
   };
 
   const handleLogin = async () => {
-    if (validate()) {
-      setAlertMessage("Login successful!");
-      setAlertType("success");
-      setShowAlert(true);
+  if (!validate()) return;
 
-      setTimeout(() => {
-        router.push("/attendance/test");
-      }, 1800);
+  setLoading(true);
+
+  try {
+    const response = await fetch("http://localhost:3000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        studentId: id,
+        password: password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Invalid credentials");
     }
-  };
+    
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    setAlertMessage("Sign in successful!");
+    setAlertType("success");
+    setShowAlert(true);
+
+    setTimeout(() => {
+      router.push("/attendance/test");
+    }, 1200);
+
+  } catch (err) {
+    const e = err as Error;
+
+    setAlertMessage(e.message);
+    setAlertType("error");
+    setShowAlert(true);
+
+    setTimeout(() => setShowAlert(false), 2500);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen w-full grid">
