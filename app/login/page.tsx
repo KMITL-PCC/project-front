@@ -124,6 +124,7 @@ export default function Login() {
         setError(data?.message ?? "Login failed. Please try again.");
         return;
       }
+      
       if(username.includes("admin")) {
         router.push("/dashboard");
       }else{
