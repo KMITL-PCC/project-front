@@ -215,7 +215,9 @@ export function AttenDance({ room }: Props) {
           <RoomHeader room={room} />
 
           <StudentProfile
-            name={user ? `${user.fname} ${user.lname}` : "Loading..."}
+            firstName={user && user.fname}
+            lastName={user && user.lname}
+            isLoading={!user}
             studentId={user ? user.studentId : "..."}
             avatarUrl="/avatar.png"
           />
