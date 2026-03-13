@@ -31,6 +31,8 @@ const AttendancePage = () => {
   const [studentId, setStudentId] = useState("");
   const [studentMajor, setStudentMajor] = useState("");
   const [role, setRole] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [selectedDate, setSelectedDate] = useState("");
   const [showAll, setShowAll] = useState(false);
@@ -42,102 +44,68 @@ const AttendancePage = () => {
     return `${day}-${month}-${year}`;
   };
 
-useEffect(() => {
-    const loadHistory = async () => {
-      // --- เริ่มส่วน Mock Data ---
-      const mockData: HistoryItem[] = [
-        {
-          status: "checked_in",
-          room_code: "401",
-          student_id: "65012345",
-          user_name: "Somchai Jaidee",
-          timestamp: "2026-03-07T08:15:00+07:00", // วันที่ 7 เช้า 8:15
-        },
-        {
-          status: "checked_out",
-          room_code: "401",
-          student_id: "65012345",
-          user_name: "Somchai Jaidee",
-          timestamp: "2026-03-07T11:30:00+07:00", // วันที่ 7 ออก 11:30
-        },
-        {
-          status: "checked_in",
-          room_code: "LAB-2",
-          student_id: "65012345",
-          user_name: "Somchai Jaidee",
-          timestamp: "2026-03-07T13:00:00+07:00", // วันที่ 7 เข้าแล็บ 13:00
-        },
-        {
-          status: "checked_out",
-          room_code: "LAB-2",
-          student_id: "65012345",
-          user_name: "Somchai Jaidee",
-          timestamp: "2026-03-07T16:00:00+07:00", // วันที่ 7 ออกแล็บ 16:00
-        },
-        {
-          status: "checked_in",
-          room_code: "LIB-01",
-          student_id: "65012345",
-          user_name: "Somchai Jaidee",
-          timestamp: "2026-03-06T10:00:00+07:00", // ของเมื่อวาน (วันที่ 6) เอาไว้เทส Filter
-        }
-      ];
+  const handleLogout = () => {
+    // Clear user data and redirect to login
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  };
+  const loadUser = async () => {
+    try {
+      const res = await fetch("/api/auth/me", {
+        credentials: "include",
+      });
 
-      // เซ็ตข้อมูลลง State เพื่อจำลองว่าโหลดมาจาก API สำเร็จ
-      setHistory(mockData);
-      setAllHistory(mockData);
+      if (!res.ok) throw new Error("Failed to get user");
 
-      if (mockData.length > 0) {
-        setStudentName(mockData[0].user_name);
-        setStudentId(mockData[0].student_id);
-        setStudentMajor("Computer Engineering"); // จำลอง Major ไปด้วยเลยจะได้ไม่เป็นค่าว่าง (-)
-      }
-      // --- จบส่วน Mock Data ---
+      const data = await res.json();
 
-      /* คอมเมนต์โค้ดของจริงเอาไว้ชั่วคราว เวลาเทสเสร็จค่อยเอาคอมเมนต์ออก
-      try {
-        const res = await fetch("http://localhost:4000/history");
-        const data = await res.json();
+      console.log("User:", data);
 
-        if (data.success) {
-          setHistory(data.data);
-          setAllHistory(data.data);
+      setStudentName(data.user.user_name);
+      setStudentId(data.user.student_id);
+      setStudentMajor(data.user.major);
+      setRole(data.user.role);
 
-          if (data.data.length > 0) {
-            setStudentName(data.data[0].user_name);
-            setStudentId(data.data[0].student_id);
-          }
-        }
-      } catch (err) {
-        console.error(err);
-      }
-      */
-    };
-
-    loadHistory();
-  }, []);
-
+      return data.user.student_id;
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load user");
+    }
+  };
   useEffect(() => {
-    const loadHistory = async () => {
+    const init = async () => {
+      setLoading(true);
+      setError("");
+
       try {
-        const res = await fetch("http://localhost:4000/history");
+        // 1 โหลด user ก่อน
+        const studentId = await loadUser();
+
+        // 2 โหลด history ของ user
+        const res = await fetch(`/api/history/${studentId}`);
+
+        if (!res.ok) throw new Error("History API error");
+
         const data = await res.json();
+
+        console.log("History:", data);
 
         if (data.success) {
           setHistory(data.data);
           setAllHistory(data.data);
-
-          if (data.data.length > 0) {
-            setStudentName(data.data[0].user_name);
-            setStudentId(data.data[0].student_id);
-          }
         }
       } catch (err) {
-        console.error(err);
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown error";
+
+        console.error(errorMessage);
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadHistory();
+    init();
   }, []);
 
   // Fixed the filtering logic
@@ -159,38 +127,56 @@ useEffect(() => {
 
   // Wrapped the entire return in a Fragment <> ... </> to fix the JSX error
   return (
-    <>
+    <div className="font">
       <div className="min-h-screen bg-gray-50 font-sans text-slate-700">
         {/* Navbar */}
-        <nav className="bg-white border-b px-6 py-3 flex justify-between items-center">
-          <div className="flex items-start gap-3">
+        <nav className="h-16 md:h-20 w-full flex justify-between items-center px-3 md:px-4 shadow-md bg-white sticky top-0 z-50">
+          <div className="flex items-center gap-2 md:gap-4">
             <img
-              src="/KMITL.png"
-              alt="KMITL Logo"
-              className="w-auto h-15 md:w-40  sm:hidden block object-contain"
+              src="KMITL.png"
+              alt="KMITL"
+              title="KMITL"
+              className="h-8 sm:h-10 md:h-16 w-auto"
             />
             <img
-              src="/Horizontal_KMITL_Logo.png"
-              alt="KMITL Logo"
-              className="w-auto h-20 hidden sm:block object-contain"
+              src="ceolgo.png"
+              alt="CE03"
+              title="CE03"
+              className="h-8 sm:h-10 md:h-16 w-auto"
             />
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="text-right text-md">
-              <p className="font-bold hidden sm:block">{studentId || "-"}</p>
-            </div>
+          <div className="text-base sm:text-xl md:text-2xl font-extrabold text-[#203864]">
+            History
+          </div>
 
-            <button className="flex items-center justify-center gap-2 border rounded-md px-3 py-1.5 text-sm hover:bg-gray-200 transition cursor-pointer">
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Log Out</span>
+          <div className="flex items-center">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1 px-2 py-1 md:px-3 md:py-2 border border-[#FE6136] hover:bg-[#F5F5F5] text-[#FE6136] cursor-pointer rounded-lg transition-all ml-2 md:ml-4 text-sm md:text-base"
+            >
+              <LogOut className="w-5 h-5 md:w-6 md:h-6" />
+              <span>Log out</span>
             </button>
           </div>
         </nav>
-
         <main className="max-w-4xl mx-auto p-6 space-y-6">
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+              ⚠️ {error}
+            </div>
+          )}
+
+          {/* Loading State */}
+          {loading ? (
+            <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+              <p className="text-gray-500">Loading attendance history...</p>
+            </div>
+          ) : (
+            <>
           {/* Profile Card */}
-          <section className="bg-white rounded-xl shadow-sm border p-8 flex flex-col items-center sm:items-start relative overflow-hidden">
+          <section className="bg-white rounded-xl shadow-sm p-8 flex flex-col items-center sm:items-start relative overflow-hidden">
             <div className="flex items-baseline gap-3 mb-2">
               <h1 className="text-3xl font-bold text-slate-800">
                 {studentName || "User Name"}
@@ -263,11 +249,14 @@ useEffect(() => {
             {(showAll ? history : history.slice(0, 3)).map((item, index) => {
               // Extract the time format (e.g., 08:30 AM)
               const timeString = item.timestamp
-                ? new Date(item.timestamp).toLocaleTimeString([], {
+                ? new Date(item.timestamp).toLocaleString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",
-                  })
-                : "--:--";
+                  }).replace(",", " ·")
+                : "--";
 
               return (
                 <AttendanceItem
@@ -298,6 +287,8 @@ useEffect(() => {
               </button>
             )}
           </div>
+            </>
+          )}
         </main>
 
         <footer className="text-center py-8 text-gray-400 text-xs">
@@ -335,7 +326,7 @@ useEffect(() => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
@@ -347,13 +338,13 @@ const AttendanceItem = ({
   statusColor,
   isExit = false,
 }: AttendanceItemProps) => (
-  <div className="bg-white border rounded-xl p-4 flex items-center justify-between shadow-sm">
+  <div className="bg-white rounded-xl p-4 flex items-center justify-between shadow-sm">
     <div className="flex items-center gap-4">
       <div className="bg-blue-50 p-2.5 rounded-lg">
         {isExit ? (
-          <LogOutIcon className="text-blue-300 w-5 h-5" />
+          <LogOutIcon className="text-kmitl w-5 h-5" />
         ) : (
-          <Building2 className="text-blue-700 w-5 h-5" />
+          <Building2 className="text-kmitl w-5 h-5" />
         )}
       </div>
 
@@ -369,7 +360,7 @@ const AttendanceItem = ({
     </div>
 
     <div className="text-right">
-      <div className="text-xl font-bold text-slate-800">{time}</div>
+      <div className="text-xs text-gray-400 font-medium">{time}</div>
       <div className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">
         {type} TIME
       </div>
