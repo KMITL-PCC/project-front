@@ -67,7 +67,7 @@ function Dashboard() {
         if (response.ok) {
           const data = await response.json();
           // ตรวจสอบว่ามีบทบาทเป็น admin หรือไม่
-          const userRole = data.user?.role?.roleId || data.user?.roleId;
+          const userRole = data.user?.roleId || data.user?.role.name;
 
           if (userRole === "admin") {
             setIsAdmin(true);
