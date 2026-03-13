@@ -20,7 +20,7 @@ export async function proxy(request: NextRequest) {
         const data = await res.json();
 
         // 4. 🔥 เช็ค Role ตามโจทย์
-        const userRole = data.user?.role?.name || data.user?.role;
+        const userRole = data.user?.roleId || data.user.role.name
 
         if (userRole === "admin") {
             // ถ้าเป็น Admin ให้เตะไป /dashboard
