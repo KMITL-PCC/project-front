@@ -101,10 +101,14 @@ function Dashboard() {
   }, [router]);
 
   useEffect(() => {
-    if (hasMounted) {
+    // if (hasMounted) {
       fetchDashboardData();
-    }
+    // }
   }, [selectedDate, selectedRoom, searchTerm, hasMounted]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [])
 
   const fetchRooms = async () => {
     try {
