@@ -31,5 +31,5 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.DEPLOY_PAT }}
-          repository: https://github.com/KMITL-PCC/deploy-year3
+          repository: KMITL-PCC/deploy-year3
           event-type: update-frontend  

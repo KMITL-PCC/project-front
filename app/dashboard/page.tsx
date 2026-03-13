@@ -109,7 +109,7 @@ function Dashboard() {
   const fetchRooms = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-      const response = await fetch(`${apiUrl}/api/rooms`, {
+      const response = await fetch(`/api/rooms`, {
         credentials: "include",
       });
       if (response.ok) {
@@ -128,7 +128,7 @@ function Dashboard() {
         ? selectedDate.toISOString().split("T")[0]
         : new Date().toISOString().split("T")[0];
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-      const url = new URL(`${apiUrl}/api/dashboard/${selectedRoom}`);
+      const url = new URL(`/api/dashboard/${selectedRoom}`);
       url.searchParams.append("date", formattedDate);
       if (searchTerm) url.searchParams.append("search", searchTerm);
       url.searchParams.append("page", "1");
@@ -218,7 +218,7 @@ function Dashboard() {
   const handleLogout = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-      await fetch(`${apiUrl}/api/auth/logout`, {
+      await fetch(`/api/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
