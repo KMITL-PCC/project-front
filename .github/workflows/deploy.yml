@@ -32,4 +32,4 @@ jobs:
         with:
           token: ${{ secrets.DEPLOY_PAT }}
           repo: https://github.com/KMITL-PCC/deploy-year3
-          event-type: update-backend  
+          event-type: update-frontend  
