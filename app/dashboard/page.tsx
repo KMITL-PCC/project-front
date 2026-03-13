@@ -58,9 +58,9 @@ function Dashboard() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-        const response = await fetch(`${apiUrl}/api/auth/me`, {
+        // const apiUrl =
+        //   process.env.NEXT_PUBLIC_API_URL;
+        const response = await fetch(`/api/auth/me`, {
           credentials: "include",
         });
 
@@ -68,14 +68,17 @@ function Dashboard() {
           const data = await response.json();
           // ตรวจสอบว่ามีบทบาทเป็น admin หรือไม่
           const userRole = data.user?.roleId || data.user?.role.name;
-
+          console.log("User Role:", userRole);
+          
           if (userRole === "admin") {
             setIsAdmin(true);
+            console.log("start Set admin----------");
             setCurrentUser({
               fname: data.user?.fname || "Admin",
               lname: data.user?.lname || "",
               roleName: data.user?.role?.name || "Administrator",
             });
+            console.log("Set current admin success");
             setHasMounted(true);
             fetchRooms();
           } else {
