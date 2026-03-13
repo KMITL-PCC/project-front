@@ -76,7 +76,7 @@ export default function Login() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          "student Id": username,
+          "studentId": username,
           password: password,
           room: selectedRoom,
         }),
