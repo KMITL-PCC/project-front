@@ -121,7 +121,7 @@ useEffect(() => {
 
         console.log("History response status:", res.status);
 
-        if (!res.ok) throw new Error("History API error");
+        if (!res.ok || res.status !== 404) throw new Error("History API error");
 
         const data = await res.json();
         console.log("History Data:", data);
