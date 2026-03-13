@@ -11,7 +11,7 @@ type HistoryItem = {
   room_code: string;
   student_id: string;
   user_name: string;
-  timestamp: string;
+  timestamp?: string;
 };
 
 type AttendanceItemProps = {
@@ -44,38 +44,51 @@ const AttendancePage = () => {
     return `${day}-${month}-${year}`;
   };
 
-  const handleLogout = () => {
-    // Clear user data and redirect to login
+  const handleLogout = async () => {
+    // 💡 Best Practice: ถ้าใช้ Cookie ควรยิง API ไปบอก Backend ให้ทำลาย Session ด้วย
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Logout API failed", err);
+    }
     localStorage.removeItem("token");
     window.location.href = "/login";
   };
+
   const loadUser = async () => {
     try {
-      const res = await fetch("/api/auth/me", {
+      const res = await fetch("http://localhost/api/auth/me", {
         credentials: "include",
       });
 
       if (!res.ok) throw new Error("Failed to get user");
 
       const data = await res.json();
+      console.log("User Data from Backend:", data.user);
 
-      console.log("User:", data);
+      // 🛡️ Fix 1: ใช้ ?. (Optional Chaining) ป้องกันบั๊กหน้าเว็บแครช (Error #31)
+      const fName = data.user?.fname || "";
+      const lName = data.user?.lname || "";
+      setStudentName(`${fName} ${lName}`.trim() || "Unknown User");
+      
+      const idToSet = data.user?.studentId || data.user?.student_id || "-";
+      setStudentId(idToSet);
+      
+      // ดักเคสเผื่อ backend ส่ง major มาเป็น object หรือ string ธรรมดา
+      const majorData = data.user?.major;
+      setStudentMajor(typeof majorData === "object" && majorData !== null ? majorData.name : (majorData || "ไม่ระบุสาขา"));
+      
+      const roleData = data.user?.role;
+      setRole(typeof roleData === "object" && roleData !== null ? roleData.name : (roleData || "User"));
 
-      setStudentName(data.user.fname + " " + data.user.lname);
-      setStudentId(data.user.studentId);
-      setStudentMajor(data.user.major.name);
-
-      // setStudentName(data.user.user_name);
-      // setStudentId(data.user.student_id);
-      // setStudentMajor(data.user.major);
-      setRole(data.user.role.name);
-
-      return data.user.studentId;
+      return idToSet;
     } catch (err) {
       console.error(err);
       setError("Failed to load user");
+      return null;
     }
   };
+
   useEffect(() => {
     const init = async () => {
       setLoading(true);
@@ -83,10 +96,26 @@ const AttendancePage = () => {
 
       try {
         // 1 โหลด user ก่อน
-        const studentId = await loadUser();
-        
-        // 2 โหลด history ของ user
-        const res = await fetch("/api/history",{
+        await loadUser();
+
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
+        console.error(errorMessage);
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    
+    }
+    init();
+  
+}, []);
+
+useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        // 2 โหลด history ของ user (สมมติว่า Backend อ่านค่าจาก Cookie แล้ว ตามโค้ดล่าสุดของน้อง)
+        const res = await fetch("http://localhost/api/history", {
           credentials: "include",
         });
 
@@ -95,28 +124,26 @@ const AttendancePage = () => {
         if (!res.ok) throw new Error("History API error");
 
         const data = await res.json();
+        console.log("History Data:", data);
 
-        console.log("History:", data);
-
-        if (data.success) {
-          setHistory(data.data);
-          setAllHistory(data.data);
+        if (data.success || data.data) {
+          // เผื่อ backend ส่ง data ออกมาตรงๆ หรืออยู่ใน .data
+          const historyData = data.data || data; 
+          setHistory(historyData);
+          setAllHistory(historyData);
         }
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Unknown error";
-
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
         console.error(errorMessage);
         setError(errorMessage);
       } finally {
         setLoading(false);
       }
-    };
+    }
+    fetchHistory();
+}, [])
 
-    init();
-  }, []);
-
-  // Fixed the filtering logic
+  // 🛡️ Fix 3: แก้บั๊ก Timezone ข้ามวัน (เปลี่ยนจาก .toISOString เป็น Local Time)
   useEffect(() => {
     if (!selectedDate) {
       setHistory(allHistory);
@@ -125,15 +152,20 @@ const AttendancePage = () => {
 
     const filtered = allHistory.filter((item) => {
       if (!item.timestamp) return false;
-      // Assuming timestamp is an ISO string like "2024-10-25T08:30:00Z"
-      const itemDate = new Date(item.timestamp).toISOString().split("T")[0];
+      
+      // ดึงเวลาในโซนไทย (Local Time) เป๊ะๆ
+      const dateObj = new Date(item.timestamp);
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const day = String(dateObj.getDate()).padStart(2, "0");
+      const itemDate = `${year}-${month}-${day}`;
+      
       return itemDate === selectedDate;
     });
 
     setHistory(filtered);
   }, [selectedDate, allHistory]);
 
-  // Wrapped the entire return in a Fragment <> ... </> to fix the JSX error
   return (
     <div className="font">
       <div className="min-h-screen bg-gray-50 font-sans text-slate-700">
@@ -168,6 +200,7 @@ const AttendancePage = () => {
             </button>
           </div>
         </nav>
+        
         <main className="max-w-4xl mx-auto p-6 space-y-6">
           {/* Error Message */}
           {error && (
@@ -183,118 +216,115 @@ const AttendancePage = () => {
             </div>
           ) : (
             <>
-          {/* Profile Card */}
-          <section className="bg-white rounded-xl shadow-sm p-8 flex flex-col items-center sm:items-start relative overflow-hidden">
-            <div className="flex items-baseline gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-slate-800">
-                {studentName || "User Name"}
-              </h1>
-            </div>
-
-            <div className="space-y-1 text-gray-500 text-sm">
-              <div className="flex items-center gap-2">
-                <img src="/id.png" alt="ID Icon" className="w-5 h-5" />
-                <p className="flex items-center gap-2 uppercase tracking-tight">
-                  ID: {studentId || "-"}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <img
-                  src="/major.png"
-                  alt="Major Icon"
-                  className="w-5 h-5 opacity-40"
-                />
-                <p className="flex items-center gap-2">
-                  Major: {studentMajor || "-"}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Attendance History Header */}
-          <div className="flex justify-between items-center pt-4">
-            <h2 className="text-lg font-bold text-slate-800">
-              Attendance History
-            </h2>
-
-            <div
-              onClick={() => setShowCalendar(true)}
-              className="text-gray-400 text-xs flex items-center gap-2 uppercase cursor-pointer"
-            >
-              <img
-                src="/calendar.png"
-                alt="Calendar Icon"
-                className="w-4 h-4 opacity-45"
-              />
-
-              {selectedDate ? formatDateDisplay(selectedDate) : "Select Date"}
-
-              <input
-                type="date"
-                ref={dateInputRef}
-                value={selectedDate}
-                onChange={(e) => {
-                  setSelectedDate(e.target.value);
-                }}
-                className="hidden"
-              />
-            </div>
-          </div>
-        
-          {/* Logs */}
-          <div className="space-y-4">
-            {history.length === 0 && (
-              <div className="flex flex-col items-center justify-center bg-gray-50 border border-dashed border-gray-300 rounded-xl p-10 text-center">
-                <div className="bg-gray-200/50 p-3 rounded-full mb-3">
-                  <img src="/calendar.png" alt="No data" className="w-6 h-6 opacity-40 grayscale" />
+              {/* Profile Card */}
+              <section className="bg-white rounded-xl shadow-sm p-8 flex flex-col items-center sm:items-start relative overflow-hidden">
+                <div className="flex items-baseline gap-3 mb-2">
+                  <h1 className="text-3xl font-bold text-slate-800">
+                    {studentName}
+                  </h1>
                 </div>
-                <h3 className="text-slate-700 font-semibold mb-1">No Records Found</h3>
-                <p className="text-gray-500 text-md">There is no attendance history for this date.</p>
+
+                <div className="space-y-1 text-gray-500 text-sm">
+                  <div className="flex items-center gap-2">
+                    <img src="/id.png" alt="ID Icon" className="w-5 h-5" />
+                    <p className="flex items-center gap-2 uppercase tracking-tight">
+                      ID: {studentId}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <img
+                      src="/major.png"
+                      alt="Major Icon"
+                      className="w-5 h-5 opacity-40"
+                    />
+                    <p className="flex items-center gap-2">
+                      Major: {studentMajor}
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* Attendance History Header */}
+              <div className="flex justify-between items-center pt-4">
+                <h2 className="text-lg font-bold text-slate-800">
+                  Attendance History
+                </h2>
+
+                <div
+                  onClick={() => setShowCalendar(true)}
+                  className="text-gray-400 text-xs flex items-center gap-2 uppercase cursor-pointer"
+                >
+                  <img
+                    src="/calendar.png"
+                    alt="Calendar Icon"
+                    className="w-4 h-4 opacity-45"
+                  />
+                  {selectedDate ? formatDateDisplay(selectedDate) : "Select Date"}
+                  <input
+                    type="date"
+                    ref={dateInputRef}
+                    value={selectedDate}
+                    onChange={(e) => {
+                      setSelectedDate(e.target.value);
+                    }}
+                    className="hidden"
+                  />
+                </div>
               </div>
-            )}
+            
+              {/* Logs */}
+              <div className="space-y-4">
+                {history.length === 0 && (
+                  <div className="flex flex-col items-center justify-center bg-gray-50 border border-dashed border-gray-300 rounded-xl p-10 text-center">
+                    <div className="bg-gray-200/50 p-3 rounded-full mb-3">
+                      <img src="/calendar.png" alt="No data" className="w-6 h-6 opacity-40 grayscale" />
+                    </div>
+                    <h3 className="text-slate-700 font-semibold mb-1">No Records Found</h3>
+                    <p className="text-gray-500 text-md">There is no attendance history for this date.</p>
+                  </div>
+                )}
 
-            {(showAll ? history : history.slice(0, 3)).map((item, index) => {
-              // Extract the time format (e.g., 08:30 AM)
-              const timeString = item.timestamp
-                ? new Date(item.timestamp).toLocaleString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  }).replace(",", " ·")
-                : "--";
+                {(showAll ? history : history.slice(0, 3)).map((item, index) => {
+                  const timeString = item.timestamp
+                    ? new Date(item.timestamp).toLocaleString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }).replace(",", " ·")
+                    : "--";
 
-              return (
-                <AttendanceItem
-                  key={index}
-                  location={`Room ${item.room_code}`}
-                  status={item.status === "checked_in" ? "Checked In" : "Checked Out"}
-                  time={timeString}
-                  type={item.status === "checked_in" ? "ENTRY" : "EXIT"}
-                  statusColor={
-                    item.status === "checked_in"
-                      ? "text-emerald-500"
-                      : "text-rose-500"
-                  }
-                  isExit={item.status === "checked_out"}
-                />
-              );
-            })}
-          </div>
+                  return (
+                    <AttendanceItem
+                      key={index}
+                      location={`Room ${item.room_code}`}
+                      status={item.status === "checked_in" ? "Checked In" : "Checked Out"}
+                      time={timeString}
+                      type={item.status === "checked_in" ? "ENTRY" : "EXIT"}
+                      statusColor={
+                        item.status === "checked_in"
+                          ? "text-emerald-500"
+                          : "text-rose-500"
+                      }
+                      isExit={item.status === "checked_out"}
+                    />
+                  );
+                })}
+              </div>
 
-          {/* Footer Link */}
-          <div className="text-center pt-6">
-            {!showAll && (
-              <button
-                onClick={() => setShowAll(true)}
-                className="text-orange-400 font-bold text-sm hover:underline"
-              >
-                View All Historical Records
-              </button>
-            )}
-          </div>
+              {/* Footer Link */}
+              <div className="text-center pt-6">
+                {!showAll && history.length > 3 && (
+                  <button
+                    onClick={() => setShowAll(true)}
+                    className="text-orange-400 font-bold text-sm hover:underline"
+                  >
+                    View All Historical Records
+                  </button>
+                )}
+              </div>
             </>
           )}
         </main>
@@ -312,19 +342,17 @@ const AttendancePage = () => {
               selected={selectedDate ? new Date(selectedDate) : null}
               onChange={(date: Date | null) => {
                 if (date) {
-                  // Standardize to YYYY-MM-DD format
-                  const offset = date.getTimezoneOffset();
-                  const localDate = new Date(
-                    date.getTime() - offset * 60 * 1000,
-                  );
-                  setSelectedDate(localDate.toISOString().split("T")[0]);
+                  // Standardize to YYYY-MM-DD format based on Local Time
+                  const year = date.getFullYear();
+                  const month = String(date.getMonth() + 1).padStart(2, "0");
+                  const day = String(date.getDate()).padStart(2, "0");
+                  setSelectedDate(`${year}-${month}-${day}`);
                 }
                 setShowCalendar(false);
               }}
               inline
               dateFormat="dd/MM/yyyy"
             />
-            {/* Added a close button for better UX */}
             <button
               onClick={() => setShowCalendar(false)}
               className="mt-4 w-full py-2 bg-gray-100 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-200"
@@ -335,7 +363,6 @@ const AttendancePage = () => {
         </div>
       )}
     </div>
-   
   );
 };
 
