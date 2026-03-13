@@ -57,7 +57,7 @@ const AttendancePage = () => {
 
   const loadUser = async () => {
     try {
-      const res = await fetch("http://localhost/api/auth/me", {
+      const res = await fetch("/api/auth/me", {
         credentials: "include",
       });
 
@@ -115,7 +115,7 @@ useEffect(() => {
     const fetchHistory = async () => {
       try {
         // 2 โหลด history ของ user (สมมติว่า Backend อ่านค่าจาก Cookie แล้ว ตามโค้ดล่าสุดของน้อง)
-        const res = await fetch("http://localhost/api/history", {
+        const res = await fetch("/api/history", {
           credentials: "include",
         });
 
