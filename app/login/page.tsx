@@ -124,7 +124,12 @@ export default function Login() {
         setError(data?.message ?? "Login failed. Please try again.");
         return;
       }
-      router.push(`/attendance/${selectedRoom}`);
+      if(username.includes("admin")) {
+        router.push("/dashboard");
+      }else{
+        router.push(`/attendance/${selectedRoom}`);
+
+      }
     } catch {
       setError("Cannot connect to server. Please try again.");
     } finally {
