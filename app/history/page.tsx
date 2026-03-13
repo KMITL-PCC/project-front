@@ -61,12 +61,16 @@ const AttendancePage = () => {
 
       console.log("User:", data);
 
-      setStudentName(data.user.user_name);
-      setStudentId(data.user.student_id);
-      setStudentMajor(data.user.major);
-      setRole(data.user.role);
+      setStudentName(data.user.fname + " " + data.user.lname);
+      setStudentId(data.user.studentId);
+      setStudentMajor(data.user.major.name);
 
-      return data.user.student_id;
+      // setStudentName(data.user.user_name);
+      // setStudentId(data.user.student_id);
+      // setStudentMajor(data.user.major);
+      setRole(data.user.role.name);
+
+      return data.user.studentId;
     } catch (err) {
       console.error(err);
       setError("Failed to load user");
@@ -80,9 +84,13 @@ const AttendancePage = () => {
       try {
         // 1 โหลด user ก่อน
         const studentId = await loadUser();
-
+        
         // 2 โหลด history ของ user
-        const res = await fetch(`/api/history/${studentId}`);
+        const res = await fetch("/api/history",{
+          credentials: "include",
+        });
+
+        console.log("History response status:", res.status);
 
         if (!res.ok) throw new Error("History API error");
 
@@ -327,6 +335,7 @@ const AttendancePage = () => {
         </div>
       )}
     </div>
+   
   );
 };
 
